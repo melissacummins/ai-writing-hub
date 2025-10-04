@@ -636,13 +636,176 @@
         }
 
         .ai-panel {
-            width: 400px;
-            background: var(--card-bg);
-            border-left: 1px solid var(--border-color);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
+    width: 400px;
+    background: var(--card-bg);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+        .ai-panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: #f8f9fa;
+}
+
+.ai-panel-tab {
+    flex: 1;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.ai-panel-tab:hover {
+    color: var(--primary-color);
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.ai-panel-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background: white;
+}
+
+.ai-panel-view {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.ai-panel-view.active {
+    display: flex;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.chat-message {
+    padding: 12px 16px;
+    border-radius: 12px;
+    max-width: 85%;
+    word-wrap: break-word;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.chat-message.user {
+    background: var(--primary-color);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-message.assistant {
+    background: #f0f0f0;
+    color: var(--text-primary);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-message.system {
+    background: var(--primary-light);
+    color: var(--text-secondary);
+    align-self: center;
+    font-size: 12px;
+    font-style: italic;
+    max-width: 90%;
+    text-align: center;
+}
+
+.chat-input-area {
+    border-top: 1px solid var(--border-color);
+    padding: 15px 20px;
+    background: white;
+}
+
+.chat-input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 40px;
+    max-height: 120px;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.chat-send-btn {
+    padding: 10px 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chat-context-info {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    padding: 8px;
+    background: var(--bg-color);
+    border-radius: 4px;
+}
+
+.chat-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.chat-empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.chat-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
 
         .ai-panel-header {
             padding: 20px;
@@ -770,7 +933,18 @@
         .setting-group {
             margin-bottom: 25px;
         }
-
+.font-preview {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-top: 8px;
+    background: white;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
         .setting-label {
             display: block;
             font-weight: 500;
@@ -812,6 +986,13 @@
             margin-top: 5px;
         }
 
+        .setting-help {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    line-height: 1.4;
+}
+        
         /* Modal */
         .modal {
             display: none;
@@ -1460,92 +1641,157 @@
             </div>
 
             <!-- AI Settings Panel -->
-            <div class="ai-panel" id="aiPanel">
-                <div class="ai-panel-header">
-                    <h3>🤖 AI Assistant</h3>
+<div class="ai-panel" id="aiPanel">
+    <div class="ai-panel-tabs">
+        <button class="ai-panel-tab active" onclick="switchAITab('settings')">⚙️ Settings</button>
+        <button class="ai-panel-tab" onclick="switchAITab('chat')">💬 Chat</button>
+    </div>
+
+    <!-- Settings View -->
+    <div class="ai-panel-view active" id="settingsView">
+        <div class="ai-panel-header">
+            <h3>🤖 AI Assistant</h3>
+        </div>
+        <div class="ai-panel-content">
+            <!-- Agent Selector (Optional Override) -->
+            <div class="agent-selector">
+                <label class="agent-selector-label">Use AI Agent (Optional)</label>
+                <div class="agent-select-wrapper">
+                    <select id="agentSelect" class="agent-select" onchange="switchAgent()">
+                        <option value="">Manual Settings</option>
+                    </select>
+                    <button class="btn btn-small btn-outline" onclick="showAgentManager()">⚙️</button>
                 </div>
-                <div class="ai-panel-content">
-                    <!-- Agent Selector (Optional Override) -->
-                    <div class="agent-selector">
-                        <label class="agent-selector-label">Use AI Agent (Optional)</label>
-                        <div class="agent-select-wrapper">
-                            <select id="agentSelect" class="agent-select" onchange="switchAgent()">
-                                <option value="">Manual Settings</option>
-                            </select>
-                            <button class="btn btn-small btn-outline" onclick="showAgentManager()">⚙️</button>
-                        </div>
-                        <div class="agent-info-box" id="agentInfoBox" style="display: none;">
-                            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
-                                Agent will override settings below
-                            </div>
-                            <div class="agent-info-row">
-                                <span class="agent-info-label">Model:</span>
-                                <span id="agentInfoModel">-</span>
-                            </div>
-                            <div class="agent-info-row">
-                                <span class="agent-info-label">Temperature:</span>
-                                <span id="agentInfoTemp">-</span>
-                            </div>
-                        </div>
+                <div class="agent-info-box" id="agentInfoBox" style="display: none;">
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                        Agent will override settings below
                     </div>
-
-                    <!-- API Key -->
-                    <div class="setting-group">
-                        <label class="setting-label">OpenRouter API Key</label>
-                        <input type="password" id="apiKey" class="setting-input" 
-                               placeholder="sk-or-..." 
-                               onchange="validateApiKey()">
-                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
-                            Get your key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter.ai</a>
-                        </div>
+                    <div class="agent-info-row">
+                        <span class="agent-info-label">Model:</span>
+                        <span id="agentInfoModel">-</span>
                     </div>
-
-                    <!-- Model -->
-                    <div class="setting-group" id="modelGroup">
-                        <label class="setting-label">AI Model</label>
-                        <select id="modelSelect" class="setting-select" onchange="onModelChange()">
-                            <option value="">Loading models...</option>
-                        </select>
-                        <button class="btn btn-outline" style="width: 100%; margin-top: 8px;" onclick="showModelManager()">
-                            📋 Manage Models
-                        </button>
-                        <div id="modelInfo" style="font-size: 11px; color: var(--text-secondary); margin-top: 5px; display: none;">
-                            <div id="modelPrice"></div>
-                            <div id="modelContext"></div>
-                        </div>
-                    </div>
-
-                    <!-- Temperature -->
-                    <div class="setting-group" id="temperatureGroup">
-                        <label class="setting-label">Temperature</label>
-                        <div class="range-labels">
-                            <span>Focused</span>
-                            <span>Creative</span>
-                        </div>
-                        <input type="range" id="temperature" class="setting-range" 
-                               min="0" max="2" step="0.1" value="0.7" 
-                               oninput="updateRangeDisplay('temperature')">
-                        <div class="range-value" id="temperatureValue">0.7</div>
-                    </div>
-
-                    <!-- Top P -->
-                    <div class="setting-group" id="topPGroup">
-                        <label class="setting-label">Top P</label>
-                        <input type="range" id="topP" class="setting-range" 
-                               min="0" max="1" step="0.05" value="0.9" 
-                               oninput="updateRangeDisplay('topP')">
-                        <div class="range-value" id="topPValue">0.9</div>
-                    </div>
-
-                    <!-- Max Tokens -->
-                    <div class="setting-group" id="maxTokensGroup">
-                        <label class="setting-label">Max Tokens</label>
-                        <input type="number" id="maxTokens" class="setting-input" 
-                               value="2000" min="100" max="8000" onchange="saveSettings()">
+                    <div class="agent-info-row">
+                        <span class="agent-info-label">Temperature:</span>
+                        <span id="agentInfoTemp">-</span>
                     </div>
                 </div>
             </div>
+
+            <!-- API Key -->
+            <div class="setting-group">
+                <label class="setting-label">OpenRouter API Key</label>
+                <input type="password" id="apiKey" class="setting-input" 
+                       placeholder="sk-or-..." 
+                       onchange="validateApiKey()">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    Get your key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter.ai</a>
+                </div>
+            </div>
+
+            <!-- Model -->
+            <div class="setting-group" id="modelGroup">
+                <label class="setting-label">AI Model</label>
+                <select id="modelSelect" class="setting-select" onchange="onModelChange()">
+                    <option value="">Loading models...</option>
+                </select>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 8px;" onclick="showModelManager()">
+                    📋 Manage Models
+                </button>
+                <div id="modelInfo" style="font-size: 11px; color: var(--text-secondary); margin-top: 5px; display: none;">
+                    <div id="modelPrice"></div>
+                    <div id="modelContext"></div>
+                </div>
+            </div>
+
+            <!-- Temperature -->
+            <div class="setting-group" id="temperatureGroup">
+                <label class="setting-label">Temperature</label>
+                <div class="range-labels">
+                    <span>Focused</span>
+                    <span>Creative</span>
+                </div>
+                <input type="range" id="temperature" class="setting-range" 
+                       min="0" max="2" step="0.1" value="0.7" 
+                       oninput="updateRangeDisplay('temperature')">
+                <div class="range-value" id="temperatureValue">0.7</div>
+            </div>
+
+            <!-- Top P -->
+            <div class="setting-group" id="topPGroup">
+                <label class="setting-label">Top P</label>
+                <input type="range" id="topP" class="setting-range" 
+                       min="0" max="1" step="0.05" value="0.9" 
+                       oninput="updateRangeDisplay('topP')">
+                <div class="range-value" id="topPValue">0.9</div>
+            </div>
+
+            <!-- Max Tokens -->
+            <div class="setting-group" id="maxTokensGroup">
+                <label class="setting-label">Max Tokens</label>
+                <input type="number" id="maxTokens" class="setting-input" 
+                       value="2000" min="100" max="8000" onchange="saveSettings()">
+            </div>
+            <!-- Frequency Penalty -->
+<div class="setting-group" id="frequencyPenaltyGroup">
+    <label class="setting-label">Frequency Penalty</label>
+    <input type="range" id="frequencyPenalty" class="setting-range" 
+           min="-2" max="2" step="0.1" value="0" 
+           oninput="updateRangeDisplay('frequencyPenalty')">
+    <div class="range-value" id="frequencyPenaltyValue">0</div>
+    <div class="setting-help">
+        Reduces repetition of words that already appeared. Higher = less repetition. (Range: -2 to 2)
+    </div>
+</div>
+
+<!-- Presence Penalty -->
+<div class="setting-group" id="presencePenaltyGroup">
+    <label class="setting-label">Presence Penalty</label>
+    <input type="range" id="presencePenalty" class="setting-range" 
+           min="-2" max="2" step="0.1" value="0" 
+           oninput="updateRangeDisplay('presencePenalty')">
+    <div class="range-value" id="presencePenaltyValue">0</div>
+    <div class="setting-help">
+        Encourages new topics. Higher = more diverse topics. (Range: -2 to 2)
+    </div>
+</div>
+
+<!-- Repetition Penalty -->
+<div class="setting-group" id="repetitionPenaltyGroup">
+    <label class="setting-label">Repetition Penalty</label>
+    <input type="range" id="repetitionPenalty" class="setting-range" 
+           min="0.1" max="2" step="0.1" value="1" 
+           oninput="updateRangeDisplay('repetitionPenalty')">
+    <div class="range-value" id="repetitionPenaltyValue">1</div>
+    <div class="setting-help">
+        Penalizes repeating tokens. 1 = no penalty, higher = less repetition. (Range: 0.1 to 2)
+    </div>
+</div>
         </div>
+    </div>
+
+    <!-- Chat View -->
+    <div class="ai-panel-view" id="chatView">
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-empty">
+                <div class="chat-empty-icon">💬</div>
+                <h3>Start a Conversation</h3>
+                <p>Ask questions, brainstorm ideas, or get feedback without affecting your documents</p>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <div class="chat-context-info" id="chatContextInfo">
+                Context: No materials enabled
+            </div>
+            <div class="chat-input-wrapper">
+                <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
+                <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
+            </div>
+            <div class="chat-actions">
+                <button class="btn btn-small btn-outline" onclick="clearChat()">Clear Chat</button>
+            </div>
+        </div>
+    </div>
+</div>
 
         <div class="status-bar">
             <div class="api-status">
@@ -1659,27 +1905,46 @@
     </div>
 
     <!-- Settings Modal -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">⚙️ Settings</h2>
-            </div>
-            
-            <div class="setting-group">
-                <label class="setting-label">OpenRouter API Key</label>
-                <input type="password" id="settingsApiKey" class="setting-input" 
-                       placeholder="sk-or-...">
-                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
-                    Get your key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter.ai</a>
-                </div>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal('settingsModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="saveSettingsModal()">Save Settings</button>
+<div class="modal" id="settingsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">⚙️ Settings</h2>
+        </div>
+        
+        <div class="setting-group">
+            <label class="setting-label">OpenRouter API Key</label>
+            <input type="password" id="settingsApiKey" class="setting-input" 
+                   placeholder="sk-or-...">
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                Get your key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter.ai</a>
             </div>
         </div>
+
+        <div class="setting-group">
+            <label class="setting-label">Editor Font</label>
+            <select id="settingsFont" class="setting-select" onchange="updateFontPreview()">
+                <option value="system">System Default</option>
+                <option value="georgia">Georgia (Serif)</option>
+                <option value="times">Times New Roman (Serif)</option>
+                <option value="palatino">Palatino (Serif)</option>
+                <option value="garamond">Garamond (Serif)</option>
+                <option value="arial">Arial (Sans-serif)</option>
+                <option value="helvetica">Helvetica (Sans-serif)</option>
+                <option value="verdana">Verdana (Sans-serif)</option>
+                <option value="courier">Courier New (Monospace)</option>
+                <option value="mono">Monaco (Monospace)</option>
+            </select>
+            <div class="font-preview" id="fontPreview">
+                The quick brown fox jumps over the lazy dog
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('settingsModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveSettingsModal()">Save Settings</button>
+        </div>
     </div>
+</div>
 
     <!-- Agent Manager Modal -->
     <div class="modal" id="agentManagerModal">
@@ -1932,6 +2197,7 @@
             materials: {},
             aiAgents: {},
             promptLibrary: {},
+            chatHistory: [],
             currentProject: null,
             currentMaterial: null,
             currentAgent: null,
@@ -1946,7 +2212,11 @@
                 model: 'anthropic/claude-3.5-sonnet',
                 temperature: 0.7,
                 topP: 0.9,
-                maxTokens: 2000
+                maxTokens: 0
+                font: 'system'
+            frequencyPenalty: 0,
+    presencePenalty: 0,
+    repetitionPenalty: 1
             }
         };
 
@@ -2336,12 +2606,15 @@
         }
 
         function saveSettings() {
-            state.settings.model = document.getElementById('modelSelect').value;
-            state.settings.temperature = parseFloat(document.getElementById('temperature').value);
-            state.settings.topP = parseFloat(document.getElementById('topP').value);
-            state.settings.maxTokens = parseInt(document.getElementById('maxTokens').value);
-            saveData();
-        }
+    state.settings.model = document.getElementById('modelSelect').value;
+    state.settings.temperature = parseFloat(document.getElementById('temperature').value);
+    state.settings.topP = parseFloat(document.getElementById('topP').value);
+    state.settings.maxTokens = parseInt(document.getElementById('maxTokens').value);
+    state.settings.frequencyPenalty = parseFloat(document.getElementById('frequencyPenalty').value);
+    state.settings.presencePenalty = parseFloat(document.getElementById('presencePenalty').value);
+    state.settings.repetitionPenalty = parseFloat(document.getElementById('repetitionPenalty').value);
+    saveData();
+}
 
         function updateRangeDisplay(type) {
             const value = document.getElementById(type).value;
@@ -2519,24 +2792,25 @@
         }
 
         function toggleManualSettings() {
-            const isManual = !state.currentAgent;
-            const infoBox = document.getElementById('agentInfoBox');
-            const groups = ['modelGroup', 'temperatureGroup', 'topPGroup', 'maxTokensGroup'];
-            
-            // Show/hide agent info
-            if (infoBox) {
-                infoBox.style.display = isManual ? 'none' : 'block';
-            }
-            
-            // Enable/disable manual settings
-            groups.forEach(groupId => {
-                const group = document.getElementById(groupId);
-                if (group) {
-                    group.style.opacity = isManual ? '1' : '0.5';
-                    group.style.pointerEvents = isManual ? 'auto' : 'none';
-                }
-            });
+    const isManual = !state.currentAgent;
+    const infoBox = document.getElementById('agentInfoBox');
+    const groups = ['modelGroup', 'temperatureGroup', 'topPGroup', 'maxTokensGroup', 
+                    'frequencyPenaltyGroup', 'presencePenaltyGroup', 'repetitionPenaltyGroup'];
+    
+    // Show/hide agent info
+    if (infoBox) {
+        infoBox.style.display = isManual ? 'none' : 'block';
+    }
+    
+    // Enable/disable manual settings
+    groups.forEach(groupId => {
+        const group = document.getElementById(groupId);
+        if (group) {
+            group.style.opacity = isManual ? '1' : '0.5';
+            group.style.pointerEvents = isManual ? 'auto' : 'none';
         }
+    });
+}
 
         function updateAgentInfo() {
             if (!state.currentAgent) {
@@ -3056,6 +3330,7 @@
 
             renderMaterials();
             updateEnabledCount();
+            updateChatContextInfo();
         }
 
         function returnToDashboard() {
@@ -3402,6 +3677,9 @@
                 },
                 placeholder: 'Start writing...'
             });
+
+            // Apply saved font
+applyFont();
 
             // Load content (HTML if available, otherwise plain text)
             if (state.currentMaterial.contentHtml) {
@@ -3847,15 +4125,18 @@
                         'X-Title': 'AI Writing Hub'
                     },
                     body: JSON.stringify({
-                        model: agent.model,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: userPrompt }
-                        ],
-                        temperature: agent.temperature,
-                        top_p: agent.topP,
-                        max_tokens: agent.maxTokens
-                    })
+    model: agent.model,
+    messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+    ],
+    temperature: agent.temperature,
+    top_p: agent.topP,
+    max_tokens: agent.maxTokens,
+    frequency_penalty: state.settings.frequencyPenalty || 0,
+    presence_penalty: state.settings.presencePenalty || 0,
+    repetition_penalty: state.settings.repetitionPenalty || 1
+})
                 });
 
                 if (!response.ok) {
@@ -3890,28 +4171,32 @@
 
         // Settings
         function showSettings() {
-            document.getElementById('settingsModal').style.display = 'flex';
-            document.getElementById('settingsApiKey').value = state.settings.apiKey || '';
-            document.getElementById('settingsApiKey').focus();
-        }
+    document.getElementById('settingsModal').style.display = 'flex';
+    document.getElementById('settingsApiKey').value = state.settings.apiKey || '';
+    document.getElementById('settingsFont').value = state.settings.font || 'system';
+    updateFontPreview();
+    document.getElementById('settingsApiKey').focus();
+}
 
         function saveSettingsModal() {
-            const hadKey = !!state.settings.apiKey;
-            state.settings.apiKey = document.getElementById('settingsApiKey').value.trim();
-            
-            saveData();
-            updateApiStatus();
-            
-            if (state.currentProject) {
-                updateSettingsUI();
-            }
-            
-            if (!hadKey && state.settings.apiKey && state.availableModels.length <= 15) {
-                loadModels();
-            }
-            
-            closeModal('settingsModal');
-        }
+    const hadKey = !!state.settings.apiKey;
+    state.settings.apiKey = document.getElementById('settingsApiKey').value.trim();
+    state.settings.font = document.getElementById('settingsFont').value;
+    
+    saveData();
+    updateApiStatus();
+    applyFont();
+    
+    if (state.currentProject) {
+        updateSettingsUI();
+    }
+    
+    if (!hadKey && state.settings.apiKey && state.availableModels.length <= 15) {
+        loadModels();
+    }
+    
+    closeModal('settingsModal');
+}
 
         function validateApiKey() {
             const key = document.getElementById('apiKey').value.trim();
@@ -3944,17 +4229,44 @@
             }
         }
 
-        function updateSettingsUI() {
-            document.getElementById('apiKey').value = state.settings.apiKey || '';
-            document.getElementById('modelSelect').value = state.settings.model;
-            document.getElementById('temperature').value = state.settings.temperature;
-            document.getElementById('topP').value = state.settings.topP;
-            document.getElementById('maxTokens').value = state.settings.maxTokens;
-            document.getElementById('temperatureValue').textContent = state.settings.temperature;
-            document.getElementById('topPValue').textContent = state.settings.topP;
-            updateModelInfo();
-            toggleManualSettings();
-        }
+       function updateSettingsUI() {
+    const apiKeyInput = document.getElementById('apiKey');
+    const modelSelect = document.getElementById('modelSelect');
+    const temperature = document.getElementById('temperature');
+    const topP = document.getElementById('topP');
+    const maxTokens = document.getElementById('maxTokens');
+    const frequencyPenalty = document.getElementById('frequencyPenalty');
+    const presencePenalty = document.getElementById('presencePenalty');
+    const repetitionPenalty = document.getElementById('repetitionPenalty');
+    
+    if (apiKeyInput) apiKeyInput.value = state.settings.apiKey || '';
+    if (modelSelect) modelSelect.value = state.settings.model;
+    if (temperature) {
+        temperature.value = state.settings.temperature;
+        document.getElementById('temperatureValue').textContent = state.settings.temperature;
+    }
+    if (topP) {
+        topP.value = state.settings.topP;
+        document.getElementById('topPValue').textContent = state.settings.topP;
+    }
+    if (maxTokens) maxTokens.value = state.settings.maxTokens;
+    if (frequencyPenalty) {
+        frequencyPenalty.value = state.settings.frequencyPenalty || 0;
+        document.getElementById('frequencyPenaltyValue').textContent = state.settings.frequencyPenalty || 0;
+    }
+    if (presencePenalty) {
+        presencePenalty.value = state.settings.presencePenalty || 0;
+        document.getElementById('presencePenaltyValue').textContent = state.settings.presencePenalty || 0;
+    }
+    if (repetitionPenalty) {
+        repetitionPenalty.value = state.settings.repetitionPenalty || 1;
+        document.getElementById('repetitionPenaltyValue').textContent = state.settings.repetitionPenalty || 1;
+    }
+    
+    updateModelInfo();
+    updateApiStatus();
+    toggleManualSettings();
+}
 
         // Utilities
         function updateEnabledCount() {
@@ -3993,6 +4305,168 @@
         function closeAllModals() {
             document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         }
+
+        function updateFontPreview() {
+    const font = document.getElementById('settingsFont').value;
+    const preview = document.getElementById('fontPreview');
+    preview.style.fontFamily = getFontFamily(font);
+}
+
+function getFontFamily(font) {
+    const fonts = {
+        'system': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        'georgia': 'Georgia, serif',
+        'times': '"Times New Roman", Times, serif',
+        'palatino': '"Palatino Linotype", "Book Antiqua", Palatino, serif',
+        'garamond': 'Garamond, serif',
+        'arial': 'Arial, Helvetica, sans-serif',
+        'helvetica': 'Helvetica, Arial, sans-serif',
+        'verdana': 'Verdana, Geneva, sans-serif',
+        'courier': '"Courier New", Courier, monospace',
+        'mono': 'Monaco, "Lucida Console", monospace'
+    };
+    return fonts[font] || fonts['system'];
+}
+
+function applyFont() {
+    if (quillEditor) {
+        quillEditor.root.style.fontFamily = getFontFamily(state.settings.font);
+    }
+}
+
+        function switchAITab(tab) {
+    document.querySelectorAll('.ai-panel-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.ai-panel-view').forEach(v => v.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    
+    if (tab === 'settings') {
+        document.getElementById('settingsView').classList.add('active');
+    } else if (tab === 'chat') {
+        document.getElementById('chatView').classList.add('active');
+        updateChatContextInfo();
+        renderChatMessages();
+    }
+}
+
+function updateChatContextInfo() {
+    if (!state.currentProject) return;
+    
+    const enabledMaterials = Object.values(state.materials)
+        .filter(m => m.projectId === state.currentProject.id && m.enabled);
+    
+    const info = document.getElementById('chatContextInfo');
+    if (enabledMaterials.length === 0) {
+        info.textContent = 'Context: No materials enabled';
+    } else {
+        info.textContent = `Context: ${enabledMaterials.length} material${enabledMaterials.length !== 1 ? 's' : ''} enabled`;
+    }
+}
+
+function renderChatMessages() {
+    const container = document.getElementById('chatMessages');
+    
+    if (!state.chatHistory || state.chatHistory.length === 0) {
+        container.innerHTML = `
+            <div class="chat-empty">
+                <div class="chat-empty-icon">💬</div>
+                <h3>Start a Conversation</h3>
+                <p>Ask questions, brainstorm ideas, or get feedback without affecting your documents</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = state.chatHistory.map(msg => {
+        const className = `chat-message ${msg.role}`;
+        return `<div class="${className}">${msg.content}</div>`;
+    }).join('');
+    
+    container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage() {
+    if (!state.settings.apiKey) {
+        alert('Please set your OpenRouter API key in Settings');
+        return;
+    }
+    
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    if (!state.chatHistory) {
+        state.chatHistory = [];
+    }
+    
+    state.chatHistory.push({
+        role: 'user',
+        content: message
+    });
+    
+    input.value = '';
+    renderChatMessages();
+    
+    const btn = document.getElementById('chatSendBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    
+    try {
+        let context = '';
+        
+        if (state.currentProject) {
+            const enabledMaterials = Object.values(state.materials)
+                .filter(m => m.projectId === state.currentProject.id && m.enabled);
+            
+            if (enabledMaterials.length > 0) {
+                context = 'Here is the context from enabled materials:\n\n';
+                enabledMaterials.forEach(m => {
+                    const content = m.contentHtml || m.content || '';
+                    context += `--- ${m.name} (${m.type}) ---\n${content}\n\n`;
+                });
+            }
+        }
+        
+        const fullMessage = context ? `${context}\n\nUser message: ${message}` : message;
+        
+        let systemPrompt = 'You are a helpful AI assistant. Provide clear, concise answers.';
+        
+        if (state.currentAgent && state.aiAgents[state.currentAgent]) {
+            const agent = state.aiAgents[state.currentAgent];
+            systemPrompt = agent.systemPrompt || systemPrompt;
+        }
+        
+        const response = await callOpenRouter(systemPrompt, fullMessage);
+        
+        state.chatHistory.push({
+            role: 'assistant',
+            content: response
+        });
+        
+        saveData();
+        renderChatMessages();
+        
+    } catch (error) {
+        alert('Error: ' + error.message);
+        state.chatHistory.pop();
+        renderChatMessages();
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send';
+        input.focus();
+    }
+}
+
+function clearChat() {
+    if (!state.chatHistory || state.chatHistory.length === 0) return;
+    
+    if (confirm('Clear all chat messages?')) {
+        state.chatHistory = [];
+        saveData();
+        renderChatMessages();
+    }
+}
     </script>
 </body>
 </html>
