@@ -2212,8 +2212,8 @@
                 model: 'anthropic/claude-3.5-sonnet',
                 temperature: 0.7,
                 topP: 0.9,
-                maxTokens: 0
-                font: 'system'
+    maxTokens: 2000,
+    font: 'system',
             frequencyPenalty: 0,
     presencePenalty: 0,
     repetitionPenalty: 1
@@ -2614,6 +2614,18 @@
     state.settings.presencePenalty = parseFloat(document.getElementById('presencePenalty').value);
     state.settings.repetitionPenalty = parseFloat(document.getElementById('repetitionPenalty').value);
     saveData();
+}
+
+        function validateApiKey() {
+    const key = document.getElementById('apiKey').value.trim();
+    const hadKey = !!state.settings.apiKey;
+    state.settings.apiKey = key;
+    saveData();
+    updateApiStatus();
+    
+    if (!hadKey && key && state.availableModels.length <= 15) {
+        loadModels();
+    }
 }
 
         function updateRangeDisplay(type) {
