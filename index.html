@@ -641,6 +641,7 @@
     border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
+    max-height: 100vh;
 }
 
         .ai-panel-tabs {
@@ -1793,6 +1794,8 @@
     </div>
 </div>
 
+        </div>
+
         <div class="status-bar">
             <div class="api-status">
                 <div class="status-dot" id="statusDot"></div>
@@ -1854,34 +1857,25 @@
     </div>
 
     <!-- Add Material Modal -->
-    <div class="modal" id="materialModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Add Material</h2>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Material Name</label>
-                <input type="text" id="materialName" class="form-input" placeholder="e.g., Draft 1, Character Notes">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Type</label>
-                <select id="materialType" class="form-select">
-                    <option value="draft">Draft</option>
-                    <option value="reference">Reference Material</option>
-                    <option value="notes">Notes</option>
-                    <option value="outline">Outline</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Content</label>
-                <textarea id="materialContent" class="form-textarea" rows="10" placeholder="Enter your content here..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal('materialModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="createMaterial()">Create</button>
-            </div>
+<div class="modal" id="materialModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add Material</h2>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Material Name</label>
+            <input type="text" id="materialName" class="form-input" placeholder="e.g., Draft 1, Character Notes">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Content</label>
+            <textarea id="materialContent" class="form-textarea" rows="10" placeholder="Enter your content here..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('materialModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="createMaterial()">Create</button>
         </div>
     </div>
+</div>
 
     <!-- Upload File Modal -->
     <div class="modal" id="uploadModal">
@@ -3362,37 +3356,36 @@
         }
 
         function createMaterial() {
-            const name = document.getElementById('materialName').value.trim();
-            const type = document.getElementById('materialType').value;
-            const content = document.getElementById('materialContent').value;
+    const name = document.getElementById('materialName').value.trim();
+    const content = document.getElementById('materialContent').value;
 
-            if (!name) {
-                alert('Please enter a material name');
-                return;
-            }
+    if (!name) {
+        alert('Please enter a material name');
+        return;
+    }
 
-            const id = 'mat_' + Date.now();
-            state.materials[id] = {
-                id,
-                projectId: state.currentProject.id,
-                name,
-                type,
-                content,
-                contentHtml: '', // For rich text
-                enabled: true,
-                created: new Date().toISOString(),
-                modified: new Date().toISOString()
-            };
+    const id = 'mat_' + Date.now();
+    state.materials[id] = {
+        id,
+        projectId: state.currentProject.id,
+        name,
+        type: 'draft', // Default type
+        content,
+        contentHtml: '', // For rich text
+        enabled: true,
+        created: new Date().toISOString(),
+        modified: new Date().toISOString()
+    };
 
-            saveData();
-            renderMaterials();
-            closeModal('materialModal');
+    saveData();
+    renderMaterials();
+    closeModal('materialModal');
 
-            document.getElementById('materialName').value = '';
-            document.getElementById('materialContent').value = '';
+    document.getElementById('materialName').value = '';
+    document.getElementById('materialContent').value = '';
 
-            selectMaterial(id);
-        }
+    selectMaterial(id);
+}
 
         function renderMaterials() {
             const container = document.getElementById('materialsList');
@@ -3896,7 +3889,7 @@ applyFont();
                     id,
                     projectId: state.currentProject.id,
                     name: file.name,
-                    type: 'reference',
+                    type: 'draft',
                     content,
                     contentHtml: content.replace(/\n/g, '<br>'),
                     enabled: true,
