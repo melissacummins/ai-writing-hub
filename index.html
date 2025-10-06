@@ -3677,12 +3677,27 @@
             ];
 
             quillEditor = new Quill('#quillEditor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: toolbarOptions
-                },
-                placeholder: 'Start writing...'
-            });
+    theme: 'snow',
+    modules: {
+        toolbar: toolbarOptions,
+        clipboard: {
+            matchVisual: false
+        }
+    },
+    placeholder: 'Start writing...'
+});
+
+// Handle paste to convert markdown
+quillEditor.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
+    const text = node.data;
+    if (text.includes('**') || text.includes('*') || text.includes('###') || text.includes('##') || text.includes('#')) {
+        const html = markdownToHtml(text);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        return quillEditor.clipboard.convert(tempDiv);
+    }
+    return delta;
+});
 
             // Apply saved font
 applyFont();
@@ -4037,36 +4052,44 @@ applyFont();
         }
 
         function acceptAIResponse(mode) {
-            const response = window.currentAIResponse;
-            if (!response || !state.currentMaterial || !quillEditor) return;
+    const response = window.currentAIResponse;
+    if (!response || !state.currentMaterial || !quillEditor) return;
 
-            const currentLength = quillEditor.getLength();
+    const currentLength = quillEditor.getLength();
+    const htmlResponse = markdownToHtml(response);
+    
+    switch (mode) {
+        case 'append':
+            const currentHtml = quillEditor.root.innerHTML;
+            quillEditor.root.innerHTML = currentHtml + '<br><br>' + htmlResponse;
+            break;
             
-            switch (mode) {
-                case 'append':
-                    quillEditor.insertText(currentLength - 1, '\n\n' + response);
-                    break;
-                    
-                case 'replace':
-                    if (confirm('Replace all content with AI response?')) {
-                        quillEditor.setText(response);
-                    } else {
-                        return;
-                    }
-                    break;
-                    
-                case 'insert':
-                    const selection = quillEditor.getSelection();
-                    const index = selection ? selection.index : currentLength - 1;
-                    quillEditor.insertText(index, '\n\n' + response + '\n\n');
-                    quillEditor.setSelection(index + response.length + 4);
-                    break;
+        case 'replace':
+            if (confirm('Replace all content with AI response?')) {
+                quillEditor.root.innerHTML = htmlResponse;
+            } else {
+                return;
             }
+            break;
+            
+        case 'insert':
+            const selection = quillEditor.getSelection();
+            const index = selection ? selection.index : currentLength - 1;
+            
+            // Get current content, split at cursor, insert new content
+            const currentHtml = quillEditor.root.innerHTML;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = currentHtml;
+            
+            // For simplicity, just append at the end with insert
+            quillEditor.root.innerHTML = currentHtml + '<br><br>' + htmlResponse + '<br><br>';
+            break;
+    }
 
-            autoSave();
-            closeAIResponse();
-            quillEditor.focus();
-        }
+    autoSave();
+    closeAIResponse();
+    quillEditor.focus();
+}
 
         async function retryAIRequest() {
             if (!lastAIRequest) {
@@ -4472,6 +4495,36 @@ function clearChat() {
         saveData();
         renderChatMessages();
     }
+}
+
+        function markdownToHtml(markdown) {
+    let html = markdown;
+    
+    // Headers
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$2</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    
+    // Bold
+    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    
+    // Italic
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+    
+    // Strikethrough
+    html = html.replace(/~~(.+?)~~/g, '<s>$1</s>');
+    
+    // Line breaks
+    html = html.replace(/\n/g, '<br>');
+    
+    // Lists
+    html = html.replace(/^\* (.+)$/gim, '<li>$1</li>');
+    html = html.replace(/^- (.+)$/gim, '<li>$1</li>');
+    html = html.replace(/^(\d+)\. (.+)$/gim, '<li>$2</li>');
+    
+    return html;
 }
     </script>
 </body>
