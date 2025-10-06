@@ -4060,8 +4060,8 @@ applyFont();
     
     switch (mode) {
         case 'append':
-            const currentHtml = quillEditor.root.innerHTML;
-            quillEditor.root.innerHTML = currentHtml + '<br><br>' + htmlResponse;
+            const appendHtml = quillEditor.root.innerHTML;
+            quillEditor.root.innerHTML = appendHtml + '<br><br>' + htmlResponse;
             break;
             
         case 'replace':
@@ -4077,12 +4077,12 @@ applyFont();
             const index = selection ? selection.index : currentLength - 1;
             
             // Get current content, split at cursor, insert new content
-            const currentHtml = quillEditor.root.innerHTML;
+            const insertHtml = quillEditor.root.innerHTML;
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = currentHtml;
+            tempDiv.innerHTML = insertHtml;
             
             // For simplicity, just append at the end with insert
-            quillEditor.root.innerHTML = currentHtml + '<br><br>' + htmlResponse + '<br><br>';
+            quillEditor.root.innerHTML = insertHtml + '<br><br>' + htmlResponse + '<br><br>';
             break;
     }
 
@@ -4228,16 +4228,16 @@ applyFont();
 }
 
         function validateApiKey() {
-            const key = document.getElementById('apiKey').value.trim();
-            const hadKey = !!state.settings.apiKey;
-            state.settings.apiKey = key;
-            saveData();
-            updateApiStatus();
-            
-            if (!hadKey && key && state.availableModels.length <= 15) {
-                loadModels();
-            }
-        }
+    const key = document.getElementById('apiKey').value.trim();
+    const hadKey = !!state.settings.apiKey;
+    state.settings.apiKey = key;
+    saveData();
+    updateApiStatus();
+    
+    if (!hadKey && key && state.availableModels.length <= 15) {
+        loadModels();
+    }
+}
 
         function updateApiStatus() {
             const dot = document.getElementById('statusDot');
