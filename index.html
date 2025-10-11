@@ -1519,7 +1519,7 @@
 
     <!-- App Header -->
     <div class="app-header">
-        <div class="app-logo">🚀 AI Writing Hub</div>
+        <div class="app-logo" style="font-size: 18px;">✨ My AI Workspace</div>
         <div class="header-actions">
             <div class="sync-status" id="syncStatus" style="display: none;">
                 <div class="sync-dot"></div>
@@ -1568,28 +1568,26 @@
 
     <!-- Workspace View -->
     <div class="workspace-view" id="workspaceView">
-        <div class="workspace-header">
-            <div class="workspace-title">
-                <button class="back-btn" onclick="returnToDashboard()">← Back</button>
-                <div>
-                    <h2 id="workspaceProjectName">Project Name</h2>
-                    <p style="font-size: 13px; color: var(--text-secondary);" id="workspaceProjectCategory">Category</p>
-                </div>
-            </div>
-        </div>
+        <div class="workspace-header" style="padding: 10px 30px;">
+    <button class="back-btn" onclick="returnToDashboard()">← Dashboard</button>
+</div>
 
         <div class="workspace-content">
             <!-- Materials Panel -->
             <div class="materials-panel">
                 <div class="materials-header">
-                    <h3>Materials</h3>
-                    <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="showAddMaterialModal()">
-                        + Add Material
-                    </button>
-                    <button class="btn btn-outline" style="width: 100%;" onclick="showUploadModal()">
-                        📤 Upload File
-                    </button>
-                </div>
+    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid var(--primary-color);">
+        <h2 id="sidebarProjectName" style="font-size: 20px; font-weight: 700; margin-bottom: 3px;">Project Name</h2>
+        <p id="sidebarProjectCategory" style="font-size: 12px; color: var(--text-secondary); margin: 0;">Category</p>
+    </div>
+    <h3 style="margin-bottom: 15px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Materials</h3>
+    <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="showAddMaterialModal()">
+        + Add Material
+    </button>
+    <button class="btn btn-outline" style="width: 100%;" onclick="showUploadModal()">
+        📤 Upload File
+    </button>
+</div>
                 <div class="materials-list" id="materialsList">
                     <div class="empty-state">
                         <div class="empty-icon" style="font-size: 32px;">📄</div>
@@ -1600,32 +1598,35 @@
 
             <!-- Editor Area -->
             <div class="editor-area">
-                <div class="editor-toolbar">
-                    <button class="btn btn-secondary" onclick="sendToAI()" id="sendBtn" disabled title="Send to AI (Ctrl/Cmd + Enter)">
-                        🚀 Send to AI
-                    </button>
-                    <button class="btn btn-primary" onclick="continueWriting()" id="continueBtn" disabled title="Continue Writing (Ctrl/Cmd + Shift + Enter)">
-                        ✍️ Continue Writing
-                    </button>
-                    <button class="btn btn-outline" onclick="showPromptLibrary()">
-                        📚 Use Prompt
-                    </button>
-                    <div class="export-dropdown">
-                        <button class="btn btn-outline" onclick="toggleExportMenu()" id="exportBtn">
-                            📥 Export
-                        </button>
-                        <div class="export-menu" id="exportMenu">
-                            <div class="export-menu-item" onclick="exportMaterial('docx')">
-                                📄 Word Document (.docx)
-                            </div>
-                            <div class="export-menu-item" onclick="exportMaterial('pdf')">
-                                📕 PDF Document (.pdf)
-                            </div>
-                            <div class="export-menu-item" onclick="exportMaterial('txt')">
-                                📝 Text File (.txt)
-                            </div>
-                        </div>
-                    </div>
+                <div class="editor-toolbar" style="background: white; border-bottom: 1px solid var(--border-color); padding: 12px 30px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+    <button class="btn btn-secondary btn-small" onclick="sendToAI()" id="sendBtn" disabled title="Send to AI (Ctrl/Cmd + Enter)">
+        🚀 Send to AI
+    </button>
+    <button class="btn btn-primary btn-small" onclick="continueWriting()" id="continueBtn" disabled title="Continue Writing (Ctrl/Cmd + Shift + Enter)">
+        ✍️ Continue
+    </button>
+    <button class="btn btn-outline btn-small" onclick="showPromptLibrary()">
+        📚 Prompt
+    </button>
+    <div class="export-dropdown">
+        <button class="btn btn-outline btn-small" onclick="toggleExportMenu()" id="exportBtn">
+            📥 Export
+        </button>
+        <div class="export-menu" id="exportMenu">
+            <div class="export-menu-item" onclick="exportMaterial('docx')">
+                📄 Word Document (.docx)
+            </div>
+            <div class="export-menu-item" onclick="exportMaterial('pdf')">
+                📕 PDF Document (.pdf)
+            </div>
+            <div class="export-menu-item" onclick="exportMaterial('txt')">
+                📝 Text File (.txt)
+            </div>
+        </div>
+    </div>
+    <div style="flex: 1;"></div>
+    <span id="enabledCount" style="color: var(--text-secondary); font-size: 12px;">0 materials enabled</span>
+</div>
                     <div style="flex: 1;"></div>
                     <span id="enabledCount" style="color: var(--text-secondary); font-size: 13px;">0 materials enabled</span>
                 </div>
@@ -3331,8 +3332,8 @@ let autoSaveTimer = null;
             document.getElementById('workspaceView').style.display = 'flex';
 
             const category = state.categories[project.categoryId];
-            document.getElementById('workspaceProjectName').textContent = project.name;
-            document.getElementById('workspaceProjectCategory').textContent = category?.name || '';
+            document.getElementById('sidebarProjectName').textContent = project.name;
+document.getElementById('sidebarProjectCategory').textContent = category?.name || '';
 
             renderMaterials();
             updateEnabledCount();
