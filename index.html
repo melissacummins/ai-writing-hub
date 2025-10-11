@@ -1629,11 +1629,8 @@
         </div>
     </div>
     <div style="flex: 1;"></div>
-    <span id="enabledCount" style="color: var(--text-secondary); font-size: 12px;">0 materials enabled</span>
+ <span id="enabledCount" style="color: var(--text-secondary); font-size: 12px;">0 materials enabled</span>
 </div>
-                    <div style="flex: 1;"></div>
-                    <span id="enabledCount" style="color: var(--text-secondary); font-size: 13px;">0 materials enabled</span>
-                </div>
                 <div class="editor-content">
                     <div class="editor-card" id="editorCard">
                         <div class="empty-state">
@@ -1642,19 +1639,18 @@
                             <p>Choose from the left panel or create a new one</p>
                         </div>
                     </div>
+              </div>
+                
+                <div class="status-bar">
+                    <div class="api-status">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">API Not Connected</span>
+                    </div>
+                    <span id="tokenCount">Ready</span>
+                    <span style="color: var(--text-secondary); font-size: 11px;">
+                        ⌨️ Shortcuts: Ctrl+Enter = Send • Ctrl+Shift+Enter = Continue
+                    </span>
                 </div>
-            </div>
-
-        <div class="status-bar">
-            <div class="api-status">
-                <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">API Not Connected</span>
-            </div>
-            <span id="tokenCount">Ready</span>
-            <span style="color: var(--text-secondary); font-size: 11px;">
-                ⌨️ Shortcuts: Ctrl+Enter = Send • Ctrl+Shift+Enter = Continue
-            </span>
-        </div>
             </div>
 
             <!-- AI Settings Panel -->
@@ -1811,6 +1807,7 @@
 </div>
 
         </div>
+    </div>
 
     <!-- Modals -->
     
