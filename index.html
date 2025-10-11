@@ -1644,7 +1644,18 @@
                 </div>
             </div>
 
-            <!-- AI Settings Panel -->
+        <div class="status-bar">
+            <div class="api-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">API Not Connected</span>
+            </div>
+            <span id="tokenCount">Ready</span>
+            <span style="color: var(--text-secondary); font-size: 11px;">
+                ⌨️ Shortcuts: Ctrl+Enter = Send • Ctrl+Shift+Enter = Continue
+            </span>
+        </div>
+
+                    <!-- AI Settings Panel -->
 <div class="ai-panel" id="aiPanel">
     <div class="ai-panel-tabs">
         <button class="ai-panel-tab active" onclick="switchAITab('settings')">⚙️ Settings</button>
@@ -1797,17 +1808,6 @@
     </div>
 </div>
 
-        </div>
-
-        <div class="status-bar">
-            <div class="api-status">
-                <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">API Not Connected</span>
-            </div>
-            <span id="tokenCount">Ready</span>
-            <span style="color: var(--text-secondary); font-size: 11px;">
-                ⌨️ Shortcuts: Ctrl+Enter = Send • Ctrl+Shift+Enter = Continue
-            </span>
         </div>
     </div>
 
