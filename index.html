@@ -534,20 +534,20 @@
         }
 
         .editor-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
+    flex: 1;
+    overflow-y: auto;
+    background: white;
+    padding: 0;
+}
 
-        .editor-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 900px;
-            margin: 0 auto;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
+       .editor-card {
+    background: white;
+    padding: 60px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100%;
+}
+        
         /* Quill Editor Customization */
 .ql-toolbar {
     border: 1px solid var(--border-color) !important;
@@ -3629,7 +3629,10 @@ let autoSaveTimer = null;
             }
 
             card.innerHTML = `
-                <h2 style="margin-bottom: 20px;">${state.currentMaterial.name}</h2>
+                <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+                    <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 5px;">${state.currentMaterial.name}</h1>
+                    <div style="font-size: 13px; color: var(--text-secondary);">Last edited: ${formatDate(state.currentMaterial.modified)}</div>
+                </div>
                 <div id="quillEditor"></div>
                 
                 <div class="ai-response-container" id="aiResponseContainer">
