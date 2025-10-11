@@ -3688,17 +3688,7 @@ let autoSaveTimer = null;
     placeholder: 'Start writing...'
 });
 
-// Handle paste to convert markdown
 quillEditor.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
-    const text = node.data;
-    if (text.includes('**') || text.includes('*') || text.includes('###') || text.includes('##') || text.includes('#')) {
-        const html = markdownToHtml(text);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-        return quillEditor.clipboard.convert(tempDiv);
-    }
-    return delta;
-});
 
             // Apply saved font
 applyFont();
