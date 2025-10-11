@@ -379,10 +379,11 @@
         }
 
         .workspace-content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    max-height: calc(100vh - 50px);
+}
 
         .materials-panel {
             width: 350px;
@@ -517,11 +518,12 @@
         }
 
         .editor-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-color);
-        }
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-color);
+    min-width: 0;
+}
 
         .editor-toolbar {
             background: var(--card-bg);
@@ -636,6 +638,7 @@
 
         .ai-panel {
     width: 400px;
+    flex-shrink: 0;
     background: var(--card-bg);
     border-left: 1px solid var(--border-color);
     display: flex;
