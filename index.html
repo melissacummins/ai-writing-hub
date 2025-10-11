@@ -3689,7 +3689,20 @@ let autoSaveTimer = null;
 });
 
 quillEditor.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
-
+    try {
+        const text = node.data;
+        if (text && (text.includes('**') || text.includes('*') || text.includes('###') || text.includes('##') || text.includes('#'))) {
+            const html = markdownToHtml(text);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            const converted = quillEditor.clipboard.convert(tempDiv);
+            return converted || delta;
+        }
+    } catch (e) {
+        console.warn('Markdown conversion failed, using original:', e);
+    }
+    return delta;
+});
             // Apply saved font
 applyFont();
 
