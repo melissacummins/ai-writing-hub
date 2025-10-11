@@ -2219,7 +2219,8 @@
         let quillEditor = null;
         let currentModelFilter = 'all';
         let editingAgentId = null;
-        let lastAIRequest = null;
+let lastAIRequest = null;
+let autoSaveTimer = null;
 
 
         // Sign In / Sign Out
@@ -3712,8 +3713,16 @@ applyFont();
             }
 
             // Auto-save on change
-            quillEditor.on('text-change', () => {
-                autoSave();
+           quillEditor.on('text-change', () => {
+                // Clear previous timer
+                if (autoSaveTimer) {
+                    clearTimeout(autoSaveTimer);
+                }
+                
+                // Only save after user stops typing for 2 seconds
+                autoSaveTimer = setTimeout(() => {
+                    autoSave();
+                }, 2000);
             });
 
             updateTokenCount();
