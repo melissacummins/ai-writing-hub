@@ -2221,6 +2221,8 @@
         let editingAgentId = null;
 let lastAIRequest = null;
 let autoSaveTimer = null;
+        let firebaseSaveTimer = null;
+
 
 
         // Sign In / Sign Out
@@ -2312,19 +2314,28 @@ let autoSaveTimer = null;
         }
 
         async function saveUserData() {
-            if (!currentUser) {
-                saveData(); // Save to localStorage as fallback
-                return;
-            }
-            
-            try {
-                await db.collection('users').doc(currentUser.uid).set(state);
-                saveData(); // Also save to localStorage as backup
-            } catch (error) {
-                console.error('Error saving user data:', error);
-                saveData(); // Fall back to localStorage
-            }
+    if (!currentUser) {
+        saveData(); // Save to localStorage as fallback
+        return;
+    }
+    
+    // Clear any existing timer
+    if (firebaseSaveTimer) {
+        clearTimeout(firebaseSaveTimer);
+    }
+    
+    // Wait 3 seconds before actually saving to Firebase
+    firebaseSaveTimer = setTimeout(async () => {
+        try {
+            await db.collection('users').doc(currentUser.uid).set(state);
+            saveData(); // Also save to localStorage as backup
+            console.log('Firebase sync complete');
+        } catch (error) {
+            console.error('Error saving user data:', error);
+            saveData(); // Fall back to localStorage
         }
+    }, 3000); // Wait 3 seconds of inactivity before syncing
+}
 
        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
