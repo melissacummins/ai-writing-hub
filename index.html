@@ -394,7 +394,7 @@
     flex: 1;
     display: flex;
     overflow: hidden;
-    height: calc(100vh - 110px);
+    height: calc(100vh - 60px);
 }
 
         .materials-panel {
@@ -1575,55 +1575,31 @@
 
     <!-- Workspace View -->
     <div class="workspace-view" id="workspaceView">
-        <div class="workspace-header">
-    <div class="workspace-title">
-    <button class="back-btn" onclick="returnToDashboard()">← Dashboard</button>
-</div>
-   <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
-    <button class="btn btn-secondary btn-small" onclick="sendToAI()" id="sendBtn" disabled title="Send to AI (Ctrl/Cmd + Enter)">
-        🚀 Send to AI
-    </button>
-    <button class="btn btn-primary btn-small" onclick="continueWriting()" id="continueBtn" disabled title="Continue Writing (Ctrl/Cmd + Shift + Enter)">
-        ✍️ Continue
-    </button>
-    <button class="btn btn-outline btn-small" onclick="showPromptLibrary()">
-        📚 Prompts
-    </button>
-    <div class="export-dropdown">
-        <button class="btn btn-outline btn-small" onclick="toggleExportMenu()" id="exportBtn">
-            📥 Export
-        </button>
-        <div class="export-menu" id="exportMenu">
-            <div class="export-menu-item" onclick="exportMaterial('docx')">
-                📄 Word Document (.docx)
-            </div>
-            <div class="export-menu-item" onclick="exportMaterial('pdf')">
-                📕 PDF Document (.pdf)
-            </div>
-            <div class="export-menu-item" onclick="exportMaterial('txt')">
-                📝 Text File (.txt)
-            </div>
-        </div>
-    </div>
-    <span id="enabledCount" style="color: var(--text-secondary); font-size: 12px; margin-left: 5px;">0 materials enabled</span>
-</div>
-</div>
-
         <div class="workspace-content">
             <!-- Materials Panel -->
             <div class="materials-panel">
                 <div class="materials-header">
+    <button class="back-btn" onclick="returnToDashboard()" style="margin-bottom: 15px; padding: 8px 12px; width: 100%;">
+        ← Back to Dashboard
+    </button>
+    
     <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid var(--primary-color);">
         <h2 id="sidebarProjectName" style="font-size: 20px; font-weight: 700; margin-bottom: 3px;">Project Name</h2>
         <p id="sidebarProjectCategory" style="font-size: 12px; color: var(--text-secondary); margin: 0;">Category</p>
     </div>
+    
     <h3 style="margin-bottom: 15px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Materials</h3>
+    
     <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="showAddMaterialModal()">
         + Add Material
     </button>
-    <button class="btn btn-outline" style="width: 100%;" onclick="showUploadModal()">
+    <button class="btn btn-outline" style="width: 100%; margin-bottom: 15px;" onclick="showUploadModal()">
         📤 Upload File
     </button>
+    
+    <div style="padding: 8px 12px; background: var(--bg-color); border-radius: 6px; text-align: center; font-size: 12px; color: var(--text-secondary);">
+        <span id="enabledCount">0 materials enabled</span>
+    </div>
 </div>
                 <div class="materials-list" id="materialsList">
                     <div class="empty-state">
@@ -1692,17 +1668,6 @@
                         <span class="agent-info-label">Temperature:</span>
                         <span id="agentInfoTemp">-</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- API Key -->
-            <div class="setting-group">
-                <label class="setting-label">OpenRouter API Key</label>
-                <input type="password" id="apiKey" class="setting-input" 
-                       placeholder="sk-or-..." 
-                       onchange="validateApiKey()">
-                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
-                    Get your key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter.ai</a>
                 </div>
             </div>
 
@@ -3647,11 +3612,39 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
             }
 
             card.innerHTML = `
-                <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
-                    <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 5px;">${state.currentMaterial.name}</h1>
-                    <div style="font-size: 13px; color: var(--text-secondary);">Last edited: ${formatDate(state.currentMaterial.modified)}</div>
+    <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+            <div>
+                <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 5px;">${state.currentMaterial.name}</h1>
+                <div style="font-size: 13px; color: var(--text-secondary);">Last edited: ${formatDate(state.currentMaterial.modified)}</div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn btn-secondary btn-small" onclick="sendToAI()" id="sendBtn" disabled title="Send to AI (Ctrl/Cmd + Enter)">
+                    🚀 Send to AI
+                </button>
+                <button class="btn btn-primary btn-small" onclick="continueWriting()" id="continueBtn" disabled title="Continue Writing (Ctrl/Cmd + Shift + Enter)">
+                    ✍️ Continue
+                </button>
+                <div class="export-dropdown">
+                    <button class="btn btn-outline btn-small" onclick="toggleExportMenu()" id="exportBtn">
+                        📥 Export
+                    </button>
+                    <div class="export-menu" id="exportMenu">
+                        <div class="export-menu-item" onclick="exportMaterial('docx')">
+                            📄 Word Document (.docx)
+                        </div>
+                        <div class="export-menu-item" onclick="exportMaterial('pdf')">
+                            📕 PDF Document (.pdf)
+                        </div>
+                        <div class="export-menu-item" onclick="exportMaterial('txt')">
+                            📝 Text File (.txt)
+                        </div>
+                    </div>
                 </div>
-                <div id="quillEditor"></div>
+            </div>
+        </div>
+    </div>
+    <div id="quillEditor"></div>
                 
                 <div class="ai-response-container" id="aiResponseContainer">
                     <div class="ai-response-header">
