@@ -3351,8 +3351,6 @@ let autoSaveTimer = null;
             const category = state.categories[project.categoryId];
             document.getElementById('sidebarProjectName').textContent = project.name;
 document.getElementById('sidebarProjectCategory').textContent = category?.name || '';
-            document.getElementById('headerProjectName').textContent = project.name;
-document.getElementById('headerProjectCategory').textContent = category?.name || '';
 
             renderMaterials();
             updateEnabledCount();
