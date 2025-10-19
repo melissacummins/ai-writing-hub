@@ -1772,9 +1772,21 @@
                     </select>
                     <button class="btn btn-small btn-outline" onclick="showAgentManager()">⚙️</button>
                 </div>
+                
+                <!-- Configuration Selector (shows when agent selected) -->
+                <div id="configSelector" style="display: none; margin-top: 10px;">
+                    <label style="font-size: 11px; font-weight: 600; color: var(--primary-dark); display: block; margin-bottom: 5px;">MODEL CONFIGURATION</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="configSelect" class="agent-select" onchange="switchConfiguration()" style="flex: 1;">
+                            <option value="">Select configuration...</option>
+                        </select>
+                        <button class="btn btn-small btn-outline" onclick="manageConfigurations()" title="Manage configurations">⚙️</button>
+                    </div>
+                </div>
+                
                 <div class="agent-info-box" id="agentInfoBox" style="display: none;">
                     <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
-                        Agent will override settings below
+                        Active configuration will override manual settings
                     </div>
                     <div class="agent-info-row">
                         <span class="agent-info-label">Model:</span>
@@ -1881,45 +1893,43 @@
 
     <!-- Chat View -->
     <div class="ai-panel-view" id="chatView">
-        <div style="display: flex; height: 100%; flex-direction: row;">
-            <!-- Chat Sidebar -->
-            <div class="chat-sidebar">
-                <div class="chat-sidebar-header">
-                    <span class="chat-sidebar-title">Chats</span>
-                    <button class="icon-btn" onclick="createNewChat()" title="New Chat">+</button>
-                </div>
-                <div class="chat-list" id="chatSidebar">
-                    <!-- Chat list will render here -->
-                </div>
+        <!-- Chat Selector Header -->
+        <div style="padding: 12px 20px; border-bottom: 1px solid var(--border-color); background: white;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+                <select id="chatSelector" class="setting-select" onchange="switchChatFromDropdown()" style="flex: 1; padding: 8px; font-size: 13px;">
+                    <option value="">Select a chat...</option>
+                </select>
+                <button class="btn btn-small btn-primary" onclick="createNewChat()" style="padding: 6px 12px; font-size: 13px;">+ New</button>
+                <button class="icon-btn" onclick="showChatActionsMenu(event)" title="Chat actions" style="font-size: 18px;">⋮</button>
             </div>
-            
-            <!-- Chat Messages Area -->
-            <div style="flex: 1; display: flex; flex-direction: column;">
-                <div style="padding: 15px; border-bottom: 1px solid var(--border-color); background: white;">
-                    <span class="chat-header-title">Chat</span>
-                </div>
-                
-                <div class="chat-messages" id="chatMessages">
-                    <div class="chat-empty">
-                        <div class="chat-empty-icon">💬</div>
-                        <h3>Start a Conversation</h3>
-                        <p>Ask questions, brainstorm ideas, or get feedback without affecting your documents</p>
-                    </div>
-                </div>
-                
-                <div class="chat-input-area">
-                    <div class="chat-context-info" id="chatContextInfo">
-                        Context: No materials enabled
-                    </div>
-                    <div class="chat-input-wrapper">
-                        <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
-                        <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
-                    </div>
-                    <div class="chat-actions">
-                        <button class="btn btn-small btn-outline" onclick="clearChat()">Clear Chat</button>
-                        <button class="btn btn-small btn-outline" onclick="createNewChat()">New Chat</button>
-                    </div>
-                </div>
+        </div>
+        
+        <!-- Chat Actions Menu (hidden by default) -->
+        <div class="context-menu" id="chatActionsMenu">
+            <div class="context-menu-item" onclick="renameCurrentChat()">✏️ Rename Chat</div>
+            <div class="context-menu-item" onclick="pinCurrentChat()">📌 Toggle Pin</div>
+            <div class="divider"></div>
+            <div class="context-menu-item" onclick="deleteCurrentChat()">🗑️ Delete Chat</div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-empty">
+                <div class="chat-empty-icon">💬</div>
+                <h3>Start a Conversation</h3>
+                <p>Ask questions, brainstorm ideas, or get feedback without affecting your documents</p>
+            </div>
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="chat-context-info" id="chatContextInfo">
+                Context: No materials enabled
+            </div>
+            <div class="chat-input-wrapper">
+                <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
+                <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
+            </div>
+            <div class="chat-actions">
+                <button class="btn btn-small btn-outline" onclick="clearChat()">Clear Messages</button>
             </div>
         </div>
     </div>
@@ -2098,50 +2108,109 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">AI Model</label>
-                <select id="agentModel" class="form-select">
-                    <option value="">Loading models...</option>
-                </select>
-                <button class="btn btn-outline btn-small" style="margin-top: 8px;" onclick="showModelManager()">
-                    📋 Browse All Models
-                </button>
-            </div>
-
-            <div class="form-group">
                 <label class="form-label">System Instructions</label>
                 <textarea id="agentSystemPrompt" class="form-textarea" rows="6" 
                           placeholder="You are a helpful AI assistant that..."></textarea>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Temperature</label>
-                <div class="range-labels">
-                    <span>Focused (0)</span>
-                    <span>Creative (2)</span>
+            <div style="border-top: 2px solid var(--border-color); margin: 30px 0; padding-top: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">Model Configurations</h3>
+                    <button class="btn btn-primary btn-small" onclick="addConfiguration()">+ Add Configuration</button>
                 </div>
-                <input type="range" id="agentTemperature" class="setting-range" 
-                       min="0" max="2" step="0.1" value="0.7" 
-                       oninput="updateAgentRangeDisplay('agentTemperature')">
-                <div class="range-value" id="agentTemperatureValue">0.7</div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Top P</label>
-                <input type="range" id="agentTopP" class="setting-range" 
-                       min="0" max="1" step="0.05" value="0.9" 
-                       oninput="updateAgentRangeDisplay('agentTopP')">
-                <div class="range-value" id="agentTopPValue">0.9</div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Max Tokens</label>
-                <input type="number" id="agentMaxTokens" class="form-input" 
-                       value="2000" min="100" max="8000">
+                
+                <div id="configurationsList">
+                    <!-- Configurations will render here -->
+                </div>
             </div>
 
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal('createAgentModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="saveAgent()">Save Agent</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Configuration Edit Modal -->
+    <div class="modal" id="configModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="configModalTitle">Add Configuration</h2>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Configuration Name</label>
+                <input type="text" id="configName" class="form-input" placeholder="e.g., Claude Balanced, GPT Creative">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">AI Model</label>
+                <select id="configModel" class="form-select">
+                    <option value="">Loading models...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Temperature</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 11px; color: var(--text-secondary);">Focused</span>
+                    <span class="range-value" id="configTemperatureValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0.7</span>
+                    <span style="font-size: 11px; color: var(--text-secondary);">Creative</span>
+                </div>
+                <input type="range" id="configTemperature" class="setting-range" 
+                       min="0" max="1" step="0.05" value="0.7" 
+                       oninput="updateConfigRangeDisplay('configTemperature')" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Top P</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="range-value" id="configTopPValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0.9</span>
+                </div>
+                <input type="range" id="configTopP" class="setting-range" 
+                       min="0" max="1" step="0.05" value="0.9" 
+                       oninput="updateConfigRangeDisplay('configTopP')" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Max Tokens</label>
+                <input type="number" id="configMaxTokens" class="form-input" 
+                       value="2000" min="100" max="8000">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Frequency Penalty</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="range-value" id="configFrequencyPenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0</span>
+                </div>
+                <input type="range" id="configFrequencyPenalty" class="setting-range" 
+                       min="0" max="1" step="0.05" value="0" 
+                       oninput="updateConfigRangeDisplay('configFrequencyPenalty')" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Presence Penalty</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="range-value" id="configPresencePenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0</span>
+                </div>
+                <input type="range" id="configPresencePenalty" class="setting-range" 
+                       min="0" max="1" step="0.05" value="0" 
+                       oninput="updateConfigRangeDisplay('configPresencePenalty')" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Repetition Penalty</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="range-value" id="configRepetitionPenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">1</span>
+                </div>
+                <input type="range" id="configRepetitionPenalty" class="setting-range" 
+                       min="0.5" max="1.5" step="0.05" value="1" 
+                       oninput="updateConfigRangeDisplay('configRepetitionPenalty')" style="width: 100%;">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('configModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveConfiguration()">Save Configuration</button>
             </div>
         </div>
     </div>
@@ -2493,6 +2562,12 @@ let autoSaveTimer = null;
                 if (userMenu && !e.target.closest('.user-profile')) {
                     userMenu.style.display = 'none';
                 }
+
+                // Close chat actions menu
+        const chatActionsMenu = document.getElementById('chatActionsMenu');
+        if (chatActionsMenu && !e.target.closest('[onclick*="showChatActionsMenu"]')) {
+            chatActionsMenu.style.display = 'none';
+        }
                 
                 // Close export menu if clicking outside
                 const exportDropdown = document.querySelector('.export-dropdown');
@@ -2920,42 +2995,52 @@ let autoSaveTimer = null;
 
         // Agent Management
         function populateAgentSelector() {
-            const select = document.getElementById('agentSelect');
-            if (!select) return;
-            
-            select.innerHTML = '<option value="">Manual Settings</option>';
-            
-            Object.values(state.aiAgents).forEach(agent => {
-                const option = document.createElement('option');
-                option.value = agent.id;
-                option.textContent = agent.name;
-                select.appendChild(option);
-            });
-            
-            select.value = state.currentAgent || '';
-            updateAgentInfo();
-        }
+    const select = document.getElementById('agentSelect');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Manual Settings</option>';
+    
+    Object.values(state.aiAgents).forEach(agent => {
+        const option = document.createElement('option');
+        option.value = agent.id;
+        option.textContent = agent.name;
+        select.appendChild(option);
+    });
+    
+    select.value = state.currentAgent || '';
+    updateAgentUI();
+}
 
         function switchAgent() {
-            const select = document.getElementById('agentSelect');
-            state.currentAgent = select.value || null;
-            saveData();
-            updateAgentInfo();
-            toggleManualSettings();
-        }
+    const select = document.getElementById('agentSelect');
+    state.currentAgent = select.value || null;
+    saveData();
+    updateAgentUI();
+    toggleManualSettings();
+}
 
-        function toggleManualSettings() {
+function switchConfiguration() {
+    if (!state.currentAgent) return;
+    
+    const agent = state.aiAgents[state.currentAgent];
+    if (!agent) return;
+    
+    const configSelect = document.getElementById('configSelect');
+    agent.activeConfigId = configSelect.value;
+    saveData();
+    updateAgentInfo();
+}
+
+function toggleManualSettings() {
     const isManual = !state.currentAgent;
     const infoBox = document.getElementById('agentInfoBox');
     const groups = ['modelGroup', 'temperatureGroup', 'topPGroup', 'maxTokensGroup', 
                     'frequencyPenaltyGroup', 'presencePenaltyGroup', 'repetitionPenaltyGroup'];
     
-    // Show/hide agent info
     if (infoBox) {
         infoBox.style.display = isManual ? 'none' : 'block';
     }
     
-    // Enable/disable manual settings
     groups.forEach(groupId => {
         const group = document.getElementById(groupId);
         if (group) {
@@ -2965,26 +3050,62 @@ let autoSaveTimer = null;
     });
 }
 
-        function updateAgentInfo() {
-            if (!state.currentAgent) {
-                // Manual mode - update UI from settings
-                document.getElementById('modelSelect').value = state.settings.model;
-                document.getElementById('temperature').value = state.settings.temperature;
-                document.getElementById('topP').value = state.settings.topP;
-                document.getElementById('maxTokens').value = state.settings.maxTokens;
-                updateRangeDisplay('temperature');
-                updateRangeDisplay('topP');
-                updateModelInfo();
-                return;
-            }
-            
-            const agent = state.aiAgents[state.currentAgent];
-            if (!agent) return;
-            
-            const model = state.availableModels.find(m => m.id === agent.model);
-            document.getElementById('agentInfoModel').textContent = model?.name || agent.model;
-            document.getElementById('agentInfoTemp').textContent = agent.temperature;
+function updateAgentUI() {
+    const configSelector = document.getElementById('configSelector');
+    const configSelect = document.getElementById('configSelect');
+    
+    if (!state.currentAgent) {
+        configSelector.style.display = 'none';
+        document.getElementById('modelSelect').value = state.settings.model;
+        document.getElementById('temperature').value = state.settings.temperature;
+        document.getElementById('topP').value = state.settings.topP;
+        document.getElementById('maxTokens').value = state.settings.maxTokens;
+        updateRangeDisplay('temperature');
+        updateRangeDisplay('topP');
+        updateModelInfo();
+        return;
+    }
+    
+    const agent = state.aiAgents[state.currentAgent];
+    if (!agent) return;
+    
+    // Show configuration selector if agent has configurations
+    if (agent.configurations && agent.configurations.length > 0) {
+        configSelector.style.display = 'block';
+        
+        configSelect.innerHTML = agent.configurations.map(config => 
+            `<option value="${config.id}" ${config.id === agent.activeConfigId ? 'selected' : ''}>
+                ${config.name}
+            </option>`
+        ).join('');
+        
+        // If no active config, select first one
+        if (!agent.activeConfigId && agent.configurations.length > 0) {
+            agent.activeConfigId = agent.configurations[0].id;
+            saveData();
         }
+    } else {
+        configSelector.style.display = 'none';
+    }
+    
+    updateAgentInfo();
+}
+
+function updateAgentInfo() {
+    if (!state.currentAgent) return;
+    
+    const agent = state.aiAgents[state.currentAgent];
+    if (!agent) return;
+    
+    // Get active configuration
+    const activeConfig = agent.configurations?.find(c => c.id === agent.activeConfigId);
+    
+    if (activeConfig) {
+        const model = state.availableModels.find(m => m.id === activeConfig.model);
+        document.getElementById('agentInfoModel').textContent = model?.name || activeConfig.model;
+        document.getElementById('agentInfoTemp').textContent = activeConfig.temperature;
+    }
+}
 
         function showAgentManager() {
             document.getElementById('agentManagerModal').style.display = 'flex';
@@ -3064,73 +3185,220 @@ let autoSaveTimer = null;
             document.getElementById('createAgentModal').style.display = 'flex';
         }
 
-        function saveAgent() {
-            const name = document.getElementById('agentName').value.trim();
-            const description = document.getElementById('agentDescription').value.trim();
-            const model = document.getElementById('agentModel').value;
-            const systemPrompt = document.getElementById('agentSystemPrompt').value.trim();
-            const temperature = parseFloat(document.getElementById('agentTemperature').value);
-            const topP = parseFloat(document.getElementById('agentTopP').value);
-            const maxTokens = parseInt(document.getElementById('agentMaxTokens').value);
-            
-            if (!name || !model) {
-                alert('Please enter an agent name and select a model');
-                return;
-            }
-            
-            if (editingAgentId) {
-                // Update existing agent
-                const agent = state.aiAgents[editingAgentId];
-                agent.name = name;
-                agent.description = description;
-                agent.model = model;
-                agent.systemPrompt = systemPrompt;
-                agent.temperature = temperature;
-                agent.topP = topP;
-                agent.maxTokens = maxTokens;
-            } else {
-                // Create new agent
-                const id = 'agent_' + Date.now();
-                state.aiAgents[id] = {
-                    id,
-                    name,
-                    description,
-                    model,
-                    systemPrompt,
-                    temperature,
-                    topP,
-                    maxTokens
-                };
-            }
-            
-            saveData();
-            populateAgentSelector();
-            renderAgentsList();
-            closeModal('createAgentModal');
-        }
+        let editingConfigId = null;
+let tempConfigurations = [];
 
-        function deleteAgent(agentId) {
-            const agent = state.aiAgents[agentId];
-            if (!agent) return;
-            
-            if (!confirm(`Delete agent "${agent.name}"?`)) return;
-            
-            delete state.aiAgents[agentId];
-            
-            // If deleting current agent, switch to manual settings
-            if (state.currentAgent === agentId) {
-                state.currentAgent = null;
-            }
-            
-            saveData();
-            populateAgentSelector();
-            renderAgentsList();
-        }
+function showCreateAgentModal() {
+    editingAgentId = null;
+    tempConfigurations = [];
+    
+    document.getElementById('agentModalTitle').textContent = 'Create AI Agent';
+    document.getElementById('agentName').value = '';
+    document.getElementById('agentDescription').value = '';
+    document.getElementById('agentSystemPrompt').value = '';
+    
+    renderConfigurationsList();
+    document.getElementById('createAgentModal').style.display = 'flex';
+}
 
-        function updateAgentRangeDisplay(id) {
-            const value = document.getElementById(id).value;
-            document.getElementById(id + 'Value').textContent = value;
+function editAgent(agentId) {
+    const agent = state.aiAgents[agentId];
+    if (!agent) return;
+    
+    editingAgentId = agentId;
+    tempConfigurations = JSON.parse(JSON.stringify(agent.configurations || []));
+    
+    document.getElementById('agentModalTitle').textContent = 'Edit AI Agent';
+    document.getElementById('agentName').value = agent.name;
+    document.getElementById('agentDescription').value = agent.description || '';
+    document.getElementById('agentSystemPrompt').value = agent.systemPrompt || '';
+    
+    renderConfigurationsList();
+    document.getElementById('createAgentModal').style.display = 'flex';
+}
+
+function renderConfigurationsList() {
+    const container = document.getElementById('configurationsList');
+    
+    if (tempConfigurations.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary); background: var(--bg-color); border-radius: 8px;">
+                <p>No configurations yet. Add at least one to get started.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = tempConfigurations.map((config, index) => {
+        const model = state.availableModels.find(m => m.id === config.model);
+        return `
+            <div style="background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 5px;">${config.name}</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">
+                            ${model?.name || config.model} • Temp: ${config.temperature} • Tokens: ${config.maxTokens}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="icon-btn" onclick="editConfiguration(${index})" title="Edit">✏️</button>
+                        <button class="icon-btn" onclick="deleteConfiguration(${index})" title="Delete">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function addConfiguration() {
+    editingConfigId = null;
+    
+    document.getElementById('configModalTitle').textContent = 'Add Configuration';
+    document.getElementById('configName').value = '';
+    document.getElementById('configModel').value = state.availableModels[0]?.id || '';
+    document.getElementById('configTemperature').value = '0.7';
+    document.getElementById('configTopP').value = '0.9';
+    document.getElementById('configMaxTokens').value = '2000';
+    document.getElementById('configFrequencyPenalty').value = '0';
+    document.getElementById('configPresencePenalty').value = '0';
+    document.getElementById('configRepetitionPenalty').value = '1';
+    
+    updateConfigRangeDisplay('configTemperature');
+    updateConfigRangeDisplay('configTopP');
+    updateConfigRangeDisplay('configFrequencyPenalty');
+    updateConfigRangeDisplay('configPresencePenalty');
+    updateConfigRangeDisplay('configRepetitionPenalty');
+    
+    // Populate model dropdown
+    const modelSelect = document.getElementById('configModel');
+    modelSelect.innerHTML = state.availableModels
+        .filter(m => !state.modelPreferences.hidden.includes(m.id))
+        .map(m => `<option value="${m.id}">${m.name}</option>`)
+        .join('');
+    
+    document.getElementById('configModal').style.display = 'flex';
+}
+
+function editConfiguration(index) {
+    editingConfigId = index;
+    const config = tempConfigurations[index];
+    
+    document.getElementById('configModalTitle').textContent = 'Edit Configuration';
+    document.getElementById('configName').value = config.name;
+    document.getElementById('configModel').value = config.model;
+    document.getElementById('configTemperature').value = config.temperature;
+    document.getElementById('configTopP').value = config.topP;
+    document.getElementById('configMaxTokens').value = config.maxTokens;
+    document.getElementById('configFrequencyPenalty').value = config.frequencyPenalty || 0;
+    document.getElementById('configPresencePenalty').value = config.presencePenalty || 0;
+    document.getElementById('configRepetitionPenalty').value = config.repetitionPenalty || 1;
+    
+    updateConfigRangeDisplay('configTemperature');
+    updateConfigRangeDisplay('configTopP');
+    updateConfigRangeDisplay('configFrequencyPenalty');
+    updateConfigRangeDisplay('configPresencePenalty');
+    updateConfigRangeDisplay('configRepetitionPenalty');
+    
+    // Populate model dropdown
+    const modelSelect = document.getElementById('configModel');
+    modelSelect.innerHTML = state.availableModels
+        .filter(m => !state.modelPreferences.hidden.includes(m.id))
+        .map(m => `<option value="${m.id}">${m.name}</option>`)
+        .join('');
+    
+    document.getElementById('configModal').style.display = 'flex';
+}
+
+function deleteConfiguration(index) {
+    if (!confirm('Delete this configuration?')) return;
+    tempConfigurations.splice(index, 1);
+    renderConfigurationsList();
+}
+
+function saveConfiguration() {
+    const name = document.getElementById('configName').value.trim();
+    const model = document.getElementById('configModel').value;
+    
+    if (!name || !model) {
+        alert('Please enter a configuration name and select a model');
+        return;
+    }
+    
+    const config = {
+        id: editingConfigId !== null ? tempConfigurations[editingConfigId].id : 'config_' + Date.now(),
+        name,
+        model,
+        temperature: parseFloat(document.getElementById('configTemperature').value),
+        topP: parseFloat(document.getElementById('configTopP').value),
+        maxTokens: parseInt(document.getElementById('configMaxTokens').value),
+        frequencyPenalty: parseFloat(document.getElementById('configFrequencyPenalty').value),
+        presencePenalty: parseFloat(document.getElementById('configPresencePenalty').value),
+        repetitionPenalty: parseFloat(document.getElementById('configRepetitionPenalty').value)
+    };
+    
+    if (editingConfigId !== null) {
+        tempConfigurations[editingConfigId] = config;
+    } else {
+        tempConfigurations.push(config);
+    }
+    
+    renderConfigurationsList();
+    closeModal('configModal');
+}
+
+function saveAgent() {
+    const name = document.getElementById('agentName').value.trim();
+    const description = document.getElementById('agentDescription').value.trim();
+    const systemPrompt = document.getElementById('agentSystemPrompt').value.trim();
+    
+    if (!name) {
+        alert('Please enter an agent name');
+        return;
+    }
+    
+    if (tempConfigurations.length === 0) {
+        alert('Please add at least one configuration');
+        return;
+    }
+    
+    if (editingAgentId) {
+        const agent = state.aiAgents[editingAgentId];
+        agent.name = name;
+        agent.description = description;
+        agent.systemPrompt = systemPrompt;
+        agent.configurations = tempConfigurations;
+        
+        // Ensure active config exists
+        if (!agent.configurations.find(c => c.id === agent.activeConfigId)) {
+            agent.activeConfigId = agent.configurations[0].id;
         }
+    } else {
+        const id = 'agent_' + Date.now();
+        state.aiAgents[id] = {
+            id,
+            name,
+            description,
+            systemPrompt,
+            configurations: tempConfigurations,
+            activeConfigId: tempConfigurations[0].id
+        };
+    }
+    
+    saveData();
+    populateAgentSelector();
+    renderAgentsList();
+    closeModal('createAgentModal');
+}
+
+function updateConfigRangeDisplay(id) {
+    const value = document.getElementById(id).value;
+    document.getElementById(id + 'Value').textContent = value;
+}
+
+function manageConfigurations() {
+    if (!state.currentAgent) return;
+    editAgent(state.currentAgent);
+}
 
         // Prompt Library
         function showPromptLibrary() {
@@ -4569,6 +4837,7 @@ function applyFont() {
     } else if (tab === 'chat') {
         document.getElementById('chatView').classList.add('active');
         updateChatContextInfo();
+        renderChatSelector();
         renderChatMessages();
     }
 }
@@ -4590,9 +4859,7 @@ function updateChatContextInfo() {
 function renderChatMessages() {
     const container = document.getElementById('chatMessages');
     
-    // Ensure we have a current chat
     if (!state.currentChatId || !state.chats[state.currentChatId]) {
-        // Create default chat if none exists
         if (Object.keys(state.chats).length === 0) {
             createNewChat();
             return;
@@ -4618,8 +4885,8 @@ function renderChatMessages() {
         const className = `chat-message ${msg.role}`;
         const actions = msg.role === 'assistant' ? `
             <div class="chat-message-actions">
-                <button class="icon-btn" onclick="copyMessageToClipboard(${index})" title="Copy">📋</button>
-                <button class="icon-btn" onclick="sendMessageToDraft(${index})" title="Send to Draft">📄</button>
+                <button class="btn btn-small btn-outline" onclick="copyMessageToClipboard(${index})" style="padding: 4px 8px; font-size: 11px;">📋 Copy</button>
+                <button class="btn btn-small btn-primary" onclick="sendMessageToDraft(${index})" style="padding: 4px 8px; font-size: 11px;">📄 To Draft</button>
             </div>
         ` : '';
         
@@ -4633,14 +4900,13 @@ function renderChatMessages() {
     
     container.scrollTop = container.scrollHeight;
 }
-
+        
 async function sendChatMessage() {
     if (!state.settings.apiKey) {
         alert('Please set your OpenRouter API key in Settings');
         return;
     }
     
-    // Ensure we have a current chat
     if (!state.currentChatId || !state.chats[state.currentChatId]) {
         createNewChat();
     }
@@ -4660,7 +4926,7 @@ async function sendChatMessage() {
     
     input.value = '';
     renderChatMessages();
-    renderChatSidebar(); // Update modified time
+    renderChatSelector();
     
     const btn = document.getElementById('chatSendBtn');
     btn.disabled = true;
@@ -4685,13 +4951,20 @@ async function sendChatMessage() {
         const fullMessage = context ? `${context}\n\nUser message: ${message}` : message;
         
         let systemPrompt = 'You are a helpful AI assistant. Provide clear, concise answers.';
+        let agentConfig = null;
         
         if (state.currentAgent && state.aiAgents[state.currentAgent]) {
             const agent = state.aiAgents[state.currentAgent];
             systemPrompt = agent.systemPrompt || systemPrompt;
+            
+            // Get active configuration
+            const activeConfig = agent.configurations?.find(c => c.id === agent.activeConfigId) || agent.configurations?.[0];
+            if (activeConfig) {
+                agentConfig = activeConfig;
+            }
         }
         
-        const response = await callOpenRouter(systemPrompt, fullMessage);
+        const response = await callOpenRouter(systemPrompt, fullMessage, agentConfig);
         
         currentChat.messages.push({
             role: 'assistant',
@@ -4701,7 +4974,7 @@ async function sendChatMessage() {
         currentChat.modified = new Date().toISOString();
         saveData();
         renderChatMessages();
-        renderChatSidebar(); // Update modified time
+        renderChatSelector();
         
     } catch (error) {
         alert('Error: ' + error.message);
@@ -4872,6 +5145,178 @@ function sendMessageToDraft(messageIndex) {
     alert('Message sent to new draft!');
 }
 
+// Chat Management Functions
+function createNewChat() {
+    const chatName = prompt('Name this chat (optional):') || 'Untitled Chat';
+    
+    const chatId = 'chat_' + Date.now();
+    state.chats[chatId] = {
+        id: chatId,
+        name: chatName.trim(),
+        created: new Date().toISOString(),
+        modified: new Date().toISOString(),
+        messages: [],
+        projectId: state.currentProject?.id || null,
+        pinned: false,
+        archived: false
+    };
+    
+    state.currentChatId = chatId;
+    saveData();
+    renderChatSelector();
+    renderChatMessages();
+}
+
+function switchChat(chatId) {
+    state.currentChatId = chatId;
+    saveData();
+    renderChatMessages();
+    renderChatSelector();
+}
+
+function switchChatFromDropdown() {
+    const selector = document.getElementById('chatSelector');
+    const chatId = selector.value;
+    if (chatId) {
+        switchChat(chatId);
+    }
+}
+
+function renderChatSelector() {
+    const selector = document.getElementById('chatSelector');
+    if (!selector) return;
+    
+    const chats = Object.values(state.chats)
+        .filter(chat => !chat.archived)
+        .sort((a, b) => {
+            if (a.pinned && !b.pinned) return -1;
+            if (!a.pinned && b.pinned) return 1;
+            return new Date(b.modified) - new Date(a.modified);
+        });
+    
+    if (chats.length === 0) {
+        selector.innerHTML = '<option value="">No chats yet - create one!</option>';
+        return;
+    }
+    
+    selector.innerHTML = chats.map(chat => {
+        const messageCount = chat.messages.length;
+        const pin = chat.pinned ? '📌 ' : '';
+        return `<option value="${chat.id}" ${chat.id === state.currentChatId ? 'selected' : ''}>
+            ${pin}${chat.name} (${messageCount} messages)
+        </option>`;
+    }).join('');
+}
+
+function showChatActionsMenu(event) {
+    event.stopPropagation();
+    const menu = document.getElementById('chatActionsMenu');
+    const rect = event.target.getBoundingClientRect();
+    menu.style.display = 'block';
+    menu.style.left = (rect.left - 150) + 'px';
+    menu.style.top = (rect.bottom + 5) + 'px';
+}
+
+function renameCurrentChat() {
+    document.getElementById('chatActionsMenu').style.display = 'none';
+    if (!state.currentChatId) return;
+    
+    const chat = state.chats[state.currentChatId];
+    if (!chat) return;
+    
+    const newName = prompt('Rename chat:', chat.name);
+    if (newName && newName.trim()) {
+        chat.name = newName.trim();
+        chat.modified = new Date().toISOString();
+        saveData();
+        renderChatSelector();
+    }
+}
+
+function pinCurrentChat() {
+    document.getElementById('chatActionsMenu').style.display = 'none';
+    if (!state.currentChatId) return;
+    
+    const chat = state.chats[state.currentChatId];
+    if (!chat) return;
+    
+    chat.pinned = !chat.pinned;
+    chat.modified = new Date().toISOString();
+    saveData();
+    renderChatSelector();
+}
+
+function deleteCurrentChat() {
+    document.getElementById('chatActionsMenu').style.display = 'none';
+    if (!state.currentChatId) return;
+    
+    const chat = state.chats[state.currentChatId];
+    if (!chat) return;
+    
+    if (!confirm(`Delete chat "${chat.name}"?`)) return;
+    
+    delete state.chats[state.currentChatId];
+    
+    const remainingChats = Object.keys(state.chats).filter(id => !state.chats[id].archived);
+    if (remainingChats.length > 0) {
+        state.currentChatId = remainingChats[0];
+    } else {
+        createNewChat();
+        return;
+    }
+    
+    saveData();
+    renderChatSelector();
+    renderChatMessages();
+}
+
+function copyMessageToClipboard(messageIndex) {
+    const currentChat = state.chats[state.currentChatId];
+    if (!currentChat || !currentChat.messages[messageIndex]) return;
+    
+    const message = currentChat.messages[messageIndex];
+    navigator.clipboard.writeText(message.content).then(() => {
+        alert('Message copied to clipboard!');
+    }).catch(err => {
+        alert('Failed to copy: ' + err.message);
+    });
+}
+
+function sendMessageToDraft(messageIndex) {
+    const currentChat = state.chats[state.currentChatId];
+    if (!currentChat || !currentChat.messages[messageIndex]) return;
+    
+    if (!state.currentProject) {
+        alert('Please open a project first');
+        return;
+    }
+    
+    const message = currentChat.messages[messageIndex];
+    const materialName = prompt('Name for new material:', 'From Chat - ' + currentChat.name);
+    
+    if (!materialName) return;
+    
+    const id = 'mat_' + Date.now();
+    state.materials[id] = {
+        id,
+        projectId: state.currentProject.id,
+        name: materialName.trim(),
+        type: 'draft',
+        content: message.content,
+        contentHtml: message.content.replace(/\n/g, '<br>'),
+        enabled: true,
+        created: new Date().toISOString(),
+        modified: new Date().toISOString()
+    };
+    
+    saveData();
+    renderMaterials();
+    selectMaterial(id);
+    switchAITab('settings');
+    
+    alert('Message sent to new draft!');
+}
+
 function clearChat() {
     const currentChat = state.chats[state.currentChatId];
     if (!currentChat) return;
@@ -4883,67 +5328,8 @@ function clearChat() {
         currentChat.modified = new Date().toISOString();
         saveData();
         renderChatMessages();
+        renderChatSelector();
     }
-}
-
-function updateChatHeader() {
-    const currentChat = state.chats[state.currentChatId];
-    if (!currentChat) return;
-    
-    const header = document.querySelector('.chat-header-title');
-    if (header) {
-        header.textContent = currentChat.name;
-    }
-}
-
-function renderChatSidebar() {
-    const sidebar = document.getElementById('chatSidebar');
-    if (!sidebar) return;
-    
-    const chats = Object.values(state.chats)
-        .filter(chat => !chat.archived)
-        .sort((a, b) => {
-            // Pinned chats first
-            if (a.pinned && !b.pinned) return -1;
-            if (!a.pinned && b.pinned) return 1;
-            // Then by modified date
-            return new Date(b.modified) - new Date(a.modified);
-        });
-    
-    if (chats.length === 0) {
-        sidebar.innerHTML = `
-            <div style="padding: 20px; text-align: center; color: var(--text-secondary);">
-                <p>No chats yet</p>
-                <button class="btn btn-primary btn-small" onclick="createNewChat()" style="margin-top: 10px;">
-                    New Chat
-                </button>
-            </div>
-        `;
-        return;
-    }
-    
-    sidebar.innerHTML = chats.map(chat => {
-        const isActive = chat.id === state.currentChatId;
-        const messageCount = chat.messages.length;
-        const lastModified = formatDate(chat.modified);
-        
-        return `
-            <div class="chat-list-item ${isActive ? 'active' : ''}" data-chat-id="${chat.id}">
-                <div class="chat-list-main" onclick="switchChat('${chat.id}')">
-                    <div class="chat-list-header">
-                        <span class="chat-list-name">${chat.pinned ? '📌 ' : ''}${chat.name}</span>
-                        <span class="chat-list-count">${messageCount}</span>
-                    </div>
-                    <div class="chat-list-meta">${lastModified}</div>
-                </div>
-                <div class="chat-list-actions">
-                    <button class="icon-btn" onclick="event.stopPropagation(); renameChat('${chat.id}')" title="Rename">✏️</button>
-                    <button class="icon-btn" onclick="event.stopPropagation(); pinChat('${chat.id}')" title="${chat.pinned ? 'Unpin' : 'Pin'}">${chat.pinned ? '📌' : '📍'}</button>
-                    <button class="icon-btn" onclick="event.stopPropagation(); deleteChat('${chat.id}')" title="Delete">🗑️</button>
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
         function markdownToHtml(markdown) {
