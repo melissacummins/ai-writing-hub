@@ -791,6 +791,120 @@
     border-radius: 4px;
 }
 
+        /* Chat Sidebar */
+.chat-sidebar {
+    width: 250px;
+    background: var(--bg-color);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+}
+
+.chat-sidebar-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.chat-list-item {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.chat-list-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.chat-list-item.active {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+}
+
+.chat-list-main {
+    padding: 12px;
+    cursor: pointer;
+}
+
+.chat-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.chat-list-name {
+    font-weight: 500;
+    font-size: 14px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-list-count {
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-color);
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+}
+
+.chat-list-meta {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.chat-list-actions {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-color);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.chat-list-item:hover .chat-list-actions {
+    opacity: 1;
+}
+
+.chat-header-title {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.chat-message-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.chat-message:hover .chat-message-actions {
+    opacity: 1;
+}
+        
 .chat-empty {
     flex: 1;
     display: flex;
@@ -1767,28 +1881,46 @@
 
     <!-- Chat View -->
     <div class="ai-panel-view" id="chatView">
-        <div class="chat-messages" id="chatMessages">
-            <div class="chat-empty">
-                <div class="chat-empty-icon">💬</div>
-                <h3>Start a Conversation</h3>
-                <p>Ask questions, brainstorm ideas, or get feedback without affecting your documents</p>
+        <div style="display: flex; height: 100%; flex-direction: row;">
+            <!-- Chat Sidebar -->
+            <div class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <span class="chat-sidebar-title">Chats</span>
+                    <button class="icon-btn" onclick="createNewChat()" title="New Chat">+</button>
+                </div>
+                <div class="chat-list" id="chatSidebar">
+                    <!-- Chat list will render here -->
+                </div>
             </div>
-        </div>
-        <div class="chat-input-area">
-            <div class="chat-context-info" id="chatContextInfo">
-                Context: No materials enabled
+            
+            <!-- Chat Messages Area -->
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div style="padding: 15px; border-bottom: 1px solid var(--border-color); background: white;">
+                    <span class="chat-header-title">Chat</span>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-empty">
+                        <div class="chat-empty-icon">💬</div>
+                        <h3>Start a Conversation</h3>
+                        <p>Ask questions, brainstorm ideas, or get feedback without affecting your documents</p>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <div class="chat-context-info" id="chatContextInfo">
+                        Context: No materials enabled
+                    </div>
+                    <div class="chat-input-wrapper">
+                        <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
+                        <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="btn btn-small btn-outline" onclick="clearChat()">Clear Chat</button>
+                        <button class="btn btn-small btn-outline" onclick="createNewChat()">New Chat</button>
+                    </div>
+                </div>
             </div>
-            <div class="chat-input-wrapper">
-                <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
-                <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
-            </div>
-            <div class="chat-actions">
-                <button class="btn btn-small btn-outline" onclick="clearChat()">Clear Chat</button>
-            </div>
-        </div>
-    </div>
-</div>
-
         </div>
     </div>
 
@@ -2170,33 +2302,34 @@
 
         // Global State
         let state = {
-            categories: {},
-            projects: {},
-            materials: {},
-            aiAgents: {},
-            promptLibrary: {},
-            chatHistory: [],
-            currentProject: null,
-            currentMaterial: null,
-            currentAgent: null,
-            recentProjects: [],
-            availableModels: [],
-            modelPreferences: {
-                favorites: [],
-                hidden: []
-            },
-            settings: {
-                apiKey: '',
-                model: 'anthropic/claude-3.5-sonnet',
-                temperature: 0.7,
-                topP: 0.9,
-    maxTokens: 2000,
-    font: 'system',
-            frequencyPenalty: 0,
-    presencePenalty: 0,
-    repetitionPenalty: 1
-            }
-        };
+    categories: {},
+    projects: {},
+    materials: {},
+    aiAgents: {},
+    promptLibrary: {},
+    chats: {}, // NEW: Store all chats
+    currentChatId: null, // NEW: Track active chat
+    currentProject: null,
+    currentMaterial: null,
+    currentAgent: null,
+    recentProjects: [],
+    availableModels: [],
+    modelPreferences: {
+        favorites: [],
+        hidden: []
+    },
+    settings: {
+        apiKey: '',
+        model: 'anthropic/claude-3.5-sonnet',
+        temperature: 0.7,
+        topP: 0.9,
+        maxTokens: 2000,
+        font: 'system',
+        frequencyPenalty: 0,
+        presencePenalty: 0,
+        repetitionPenalty: 1
+    }
+};
 
         let currentUser = null;
         let quillEditor = null;
@@ -2322,6 +2455,24 @@ let autoSaveTimer = null;
 
        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Ensure at least one chat exists
+    if (Object.keys(state.chats).length === 0) {
+        const chatId = 'chat_' + Date.now();
+        state.chats[chatId] = {
+            id: chatId,
+            name: 'General Chat',
+            created: new Date().toISOString(),
+            modified: new Date().toISOString(),
+            messages: [],
+            projectId: null,
+            pinned: false,
+            archived: false
+        };
+        state.currentChatId = chatId;
+    } else if (!state.currentChatId) {
+        // Set current chat to first available
+        state.currentChatId = Object.keys(state.chats)[0];
+    }
             // Initialize Firebase first
             initializeFirebase();
             
@@ -4439,7 +4590,20 @@ function updateChatContextInfo() {
 function renderChatMessages() {
     const container = document.getElementById('chatMessages');
     
-    if (!state.chatHistory || state.chatHistory.length === 0) {
+    // Ensure we have a current chat
+    if (!state.currentChatId || !state.chats[state.currentChatId]) {
+        // Create default chat if none exists
+        if (Object.keys(state.chats).length === 0) {
+            createNewChat();
+            return;
+        } else {
+            state.currentChatId = Object.keys(state.chats)[0];
+        }
+    }
+    
+    const currentChat = state.chats[state.currentChatId];
+    
+    if (!currentChat.messages || currentChat.messages.length === 0) {
         container.innerHTML = `
             <div class="chat-empty">
                 <div class="chat-empty-icon">💬</div>
@@ -4450,9 +4614,21 @@ function renderChatMessages() {
         return;
     }
     
-    container.innerHTML = state.chatHistory.map(msg => {
+    container.innerHTML = currentChat.messages.map((msg, index) => {
         const className = `chat-message ${msg.role}`;
-        return `<div class="${className}">${msg.content}</div>`;
+        const actions = msg.role === 'assistant' ? `
+            <div class="chat-message-actions">
+                <button class="icon-btn" onclick="copyMessageToClipboard(${index})" title="Copy">📋</button>
+                <button class="icon-btn" onclick="sendMessageToDraft(${index})" title="Send to Draft">📄</button>
+            </div>
+        ` : '';
+        
+        return `
+            <div class="${className}">
+                ${msg.content}
+                ${actions}
+            </div>
+        `;
     }).join('');
     
     container.scrollTop = container.scrollHeight;
@@ -4464,22 +4640,27 @@ async function sendChatMessage() {
         return;
     }
     
+    // Ensure we have a current chat
+    if (!state.currentChatId || !state.chats[state.currentChatId]) {
+        createNewChat();
+    }
+    
+    const currentChat = state.chats[state.currentChatId];
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
     
     if (!message) return;
     
-    if (!state.chatHistory) {
-        state.chatHistory = [];
-    }
-    
-    state.chatHistory.push({
+    currentChat.messages.push({
         role: 'user',
         content: message
     });
     
+    currentChat.modified = new Date().toISOString();
+    
     input.value = '';
     renderChatMessages();
+    renderChatSidebar(); // Update modified time
     
     const btn = document.getElementById('chatSendBtn');
     btn.disabled = true;
@@ -4512,17 +4693,19 @@ async function sendChatMessage() {
         
         const response = await callOpenRouter(systemPrompt, fullMessage);
         
-        state.chatHistory.push({
+        currentChat.messages.push({
             role: 'assistant',
             content: response
         });
         
+        currentChat.modified = new Date().toISOString();
         saveData();
         renderChatMessages();
+        renderChatSidebar(); // Update modified time
         
     } catch (error) {
         alert('Error: ' + error.message);
-        state.chatHistory.pop();
+        currentChat.messages.pop();
         renderChatMessages();
     } finally {
         btn.disabled = false;
@@ -4531,14 +4714,236 @@ async function sendChatMessage() {
     }
 }
 
-function clearChat() {
-    if (!state.chatHistory || state.chatHistory.length === 0) return;
+// Chat Management Functions
+function createNewChat() {
+    const chatId = 'chat_' + Date.now();
+    const chatName = prompt('Name this chat (optional):') || 'Untitled Chat';
     
-    if (confirm('Clear all chat messages?')) {
-        state.chatHistory = [];
+    state.chats[chatId] = {
+        id: chatId,
+        name: chatName,
+        created: new Date().toISOString(),
+        modified: new Date().toISOString(),
+        messages: [],
+        projectId: state.currentProject?.id || null,
+        pinned: false,
+        archived: false
+    };
+    
+    state.currentChatId = chatId;
+    saveData();
+    renderChatSidebar();
+    renderChatMessages();
+    updateChatHeader();
+}
+
+function switchChat(chatId) {
+    state.currentChatId = chatId;
+    saveData();
+    renderChatMessages();
+    updateChatHeader();
+    
+    // Update active state in sidebar
+    document.querySelectorAll('.chat-list-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.chatId === chatId);
+    });
+}
+
+function renameChat(chatId) {
+    const chat = state.chats[chatId];
+    if (!chat) return;
+    
+    const newName = prompt('Rename chat:', chat.name);
+    if (newName && newName.trim()) {
+        chat.name = newName.trim();
+        chat.modified = new Date().toISOString();
+        saveData();
+        renderChatSidebar();
+        updateChatHeader();
+    }
+}
+
+function deleteChat(chatId) {
+    const chat = state.chats[chatId];
+    if (!chat) return;
+    
+    if (!confirm(`Delete chat "${chat.name}"?`)) return;
+    
+    delete state.chats[chatId];
+    
+    // If deleting current chat, switch to another or create new
+    if (state.currentChatId === chatId) {
+        const remainingChats = Object.keys(state.chats);
+        if (remainingChats.length > 0) {
+            state.currentChatId = remainingChats[0];
+        } else {
+            // Create a default chat
+            createNewChat();
+            return;
+        }
+    }
+    
+    saveData();
+    renderChatSidebar();
+    renderChatMessages();
+    updateChatHeader();
+}
+
+function pinChat(chatId) {
+    const chat = state.chats[chatId];
+    if (!chat) return;
+    
+    chat.pinned = !chat.pinned;
+    chat.modified = new Date().toISOString();
+    saveData();
+    renderChatSidebar();
+}
+
+function archiveChat(chatId) {
+    const chat = state.chats[chatId];
+    if (!chat) return;
+    
+    chat.archived = !chat.archived;
+    chat.modified = new Date().toISOString();
+    
+    // If archiving current chat, switch to another
+    if (state.currentChatId === chatId && chat.archived) {
+        const activeChats = Object.values(state.chats).filter(c => !c.archived);
+        if (activeChats.length > 0) {
+            state.currentChatId = activeChats[0].id;
+        } else {
+            createNewChat();
+            return;
+        }
+    }
+    
+    saveData();
+    renderChatSidebar();
+    renderChatMessages();
+    updateChatHeader();
+}
+
+function copyMessageToClipboard(messageIndex) {
+    const currentChat = state.chats[state.currentChatId];
+    if (!currentChat || !currentChat.messages[messageIndex]) return;
+    
+    const message = currentChat.messages[messageIndex];
+    navigator.clipboard.writeText(message.content).then(() => {
+        alert('Message copied to clipboard!');
+    }).catch(err => {
+        alert('Failed to copy: ' + err.message);
+    });
+}
+
+function sendMessageToDraft(messageIndex) {
+    const currentChat = state.chats[state.currentChatId];
+    if (!currentChat || !currentChat.messages[messageIndex]) return;
+    
+    if (!state.currentProject) {
+        alert('Please open a project first');
+        return;
+    }
+    
+    const message = currentChat.messages[messageIndex];
+    const materialName = prompt('Name for new material:', 'From Chat - ' + currentChat.name);
+    
+    if (!materialName) return;
+    
+    const id = 'mat_' + Date.now();
+    state.materials[id] = {
+        id,
+        projectId: state.currentProject.id,
+        name: materialName.trim(),
+        type: 'draft',
+        content: message.content,
+        contentHtml: message.content.replace(/\n/g, '<br>'),
+        enabled: true,
+        created: new Date().toISOString(),
+        modified: new Date().toISOString()
+    };
+    
+    saveData();
+    renderMaterials();
+    selectMaterial(id);
+    
+    // Switch to settings tab to show the draft
+    switchAITab('settings');
+    
+    alert('Message sent to new draft!');
+}
+
+function clearChat() {
+    const currentChat = state.chats[state.currentChatId];
+    if (!currentChat) return;
+    
+    if (currentChat.messages.length === 0) return;
+    
+    if (confirm(`Clear all messages in "${currentChat.name}"?`)) {
+        currentChat.messages = [];
+        currentChat.modified = new Date().toISOString();
         saveData();
         renderChatMessages();
     }
+}
+
+function updateChatHeader() {
+    const currentChat = state.chats[state.currentChatId];
+    if (!currentChat) return;
+    
+    const header = document.querySelector('.chat-header-title');
+    if (header) {
+        header.textContent = currentChat.name;
+    }
+}
+
+function renderChatSidebar() {
+    const sidebar = document.getElementById('chatSidebar');
+    if (!sidebar) return;
+    
+    const chats = Object.values(state.chats)
+        .filter(chat => !chat.archived)
+        .sort((a, b) => {
+            // Pinned chats first
+            if (a.pinned && !b.pinned) return -1;
+            if (!a.pinned && b.pinned) return 1;
+            // Then by modified date
+            return new Date(b.modified) - new Date(a.modified);
+        });
+    
+    if (chats.length === 0) {
+        sidebar.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+                <p>No chats yet</p>
+                <button class="btn btn-primary btn-small" onclick="createNewChat()" style="margin-top: 10px;">
+                    New Chat
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    sidebar.innerHTML = chats.map(chat => {
+        const isActive = chat.id === state.currentChatId;
+        const messageCount = chat.messages.length;
+        const lastModified = formatDate(chat.modified);
+        
+        return `
+            <div class="chat-list-item ${isActive ? 'active' : ''}" data-chat-id="${chat.id}">
+                <div class="chat-list-main" onclick="switchChat('${chat.id}')">
+                    <div class="chat-list-header">
+                        <span class="chat-list-name">${chat.pinned ? '📌 ' : ''}${chat.name}</span>
+                        <span class="chat-list-count">${messageCount}</span>
+                    </div>
+                    <div class="chat-list-meta">${lastModified}</div>
+                </div>
+                <div class="chat-list-actions">
+                    <button class="icon-btn" onclick="event.stopPropagation(); renameChat('${chat.id}')" title="Rename">✏️</button>
+                    <button class="icon-btn" onclick="event.stopPropagation(); pinChat('${chat.id}')" title="${chat.pinned ? 'Unpin' : 'Pin'}">${chat.pinned ? '📌' : '📍'}</button>
+                    <button class="icon-btn" onclick="event.stopPropagation(); deleteChat('${chat.id}')" title="Delete">🗑️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
         function markdownToHtml(markdown) {
