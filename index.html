@@ -5027,30 +5027,35 @@ function formatChatMessage(content) {
     // Convert markdown-style formatting to HTML
     let formatted = content;
     
-    // Bold: **text** or __text__
-    formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    formatted = formatted.replace(/__(.+?)__/g, '<strong>$1</strong>');
+    // Escape any existing HTML to prevent issues
+    formatted = formatted.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     
-    // Italic: *text* or _text_
-    formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    formatted = formatted.replace(/_(.+?)_/g, '<em>$1</em>');
-    
-    // Headers: ## Header
+    // Headers: ## Header (do FIRST before other replacements)
     formatted = formatted.replace(/^### (.+)$/gm, '<h3 style="font-size: 14px; font-weight: 600; margin: 10px 0 5px 0;">$1</h3>');
     formatted = formatted.replace(/^## (.+)$/gm, '<h2 style="font-size: 15px; font-weight: 600; margin: 12px 0 6px 0;">$1</h2>');
     
-    // Bullet lists: - item or * item
-    formatted = formatted.replace(/^[•\-\*] (.+)$/gm, '<li style="margin-left: 20px;">$1</li>');
+    // Bold: **text** (do BEFORE italic)
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     
-    // Wrap lists in ul tags
-    formatted = formatted.replace(/(<li[^>]*>.*<\/li>\s*)+/gs, '<ul style="margin: 5px 0; padding-left: 10px;">$&</ul>');
+    // Italic: *text* (do AFTER bold)
+    formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     
-    // Line breaks
+    // Bullet lists: - item or • item
+    formatted = formatted.replace(/^[•-] (.+)$/gm, '<li style="margin-left: 20px;">$1</li>');
+    
+    // Wrap consecutive list items in ul tags
+    formatted = formatted.replace(/(<li[^>]*>.*?<\/li>\s*)+/g, '<ul style="margin: 5px 0; padding-left: 10px;">$&</ul>');
+    
+    // Paragraphs: double line breaks
     formatted = formatted.replace(/\n\n/g, '</p><p style="margin: 8px 0;">');
+    
+    // Single line breaks
     formatted = formatted.replace(/\n/g, '<br>');
     
-    // Wrap in paragraph
-    formatted = '<p style="margin: 0;">' + formatted + '</p>';
+    // Wrap in paragraph tags
+    if (!formatted.startsWith('<')) {
+        formatted = '<p style="margin: 0;">' + formatted + '</p>';
+    }
     
     return formatted;
 }
