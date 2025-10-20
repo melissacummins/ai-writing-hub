@@ -1918,6 +1918,8 @@
         Penalizes repeating tokens. 1 = no penalty.
     </div>
 </div>
+        </div> <!-- Close ai-panel-content -->
+    </div> <!-- Close settingsView -->
 
     <!-- Chat View -->
     <div class="ai-panel-view" id="chatView">
@@ -5146,29 +5148,6 @@ async function sendChatMessage() {
         btn.textContent = 'Send';
         input.focus();
     }
-}
-
-// Chat Management Functions
-function createNewChat() {
-    const chatId = 'chat_' + Date.now();
-    const chatName = prompt('Name this chat (optional):') || 'Untitled Chat';
-    
-    state.chats[chatId] = {
-        id: chatId,
-        name: chatName,
-        created: new Date().toISOString(),
-        modified: new Date().toISOString(),
-        messages: [],
-        projectId: state.currentProject?.id || null,
-        pinned: false,
-        archived: false
-    };
-    
-    state.currentChatId = chatId;
-    saveData();
-    renderChatSidebar();
-    renderChatMessages();
-    updateChatHeader();
 }
 
 function switchChat(chatId) {
