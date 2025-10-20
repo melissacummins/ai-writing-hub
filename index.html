@@ -560,7 +560,7 @@
 
        .editor-card {
     background: white;
-    padding: 60px 120px;
+    padding: 40px 80px;
     max-width: none;
     margin: 0 auto;
     height: 100%;
@@ -580,6 +580,20 @@
 .tox .tox-toolbar {
     background: white !important;
     border-bottom: 1px solid var(--border-color) !important;
+}
+
+        /* Fix TinyMCE fullscreen button */
+.tox .tox-tbtn {
+    cursor: pointer;
+}
+
+.tox-fullscreen {
+    z-index: 10000 !important;
+}
+
+.tox-fullscreen .tox-toolbar,
+.tox-fullscreen .tox-edit-area {
+    background: white !important;
 }
         
         /* AI Response Box */
@@ -1821,46 +1835,55 @@
 
             <!-- Temperature -->
 <div class="setting-group" id="temperatureGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <label class="setting-label" style="margin: 0;">Temperature</label>
-        <span class="range-value" id="temperatureValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0.7</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+        <label class="setting-label" style="margin: 0; flex: 1;">Temperature</label>
+        <input type="number" id="temperature" class="setting-input" 
+               value="0.7" min="0" max="2" step="0.1" 
+               onchange="saveSettings()"
+               style="width: 100px; text-align: center;">
     </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <span style="font-size: 11px; color: var(--text-secondary);">Focused</span>
-        <input type="range" id="temperature" class="setting-range" 
-               min="0" max="1" step="0.05" value="0.7" 
-               oninput="updateRangeDisplay('temperature')" style="flex: 1;">
-        <span style="font-size: 11px; color: var(--text-secondary);">Creative</span>
+    <div class="setting-help">
+        Controls creativity (0 = deterministic, 2 = very creative)
     </div>
 </div>
 
-            <!-- Top P -->
+<!-- Top P -->
 <div class="setting-group" id="topPGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <label class="setting-label" style="margin: 0;">Top P</label>
-        <span class="range-value" id="topPValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0.9</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+        <label class="setting-label" style="margin: 0; flex: 1;">Top P</label>
+        <input type="number" id="topP" class="setting-input" 
+               value="0.9" min="0" max="1" step="0.05" 
+               onchange="saveSettings()"
+               style="width: 100px; text-align: center;">
     </div>
-    <input type="range" id="topP" class="setting-range" 
-           min="0" max="1" step="0.05" value="0.9" 
-           oninput="updateRangeDisplay('topP')" style="width: 100%;">
+    <div class="setting-help">
+        Controls randomness (0 to 1)
+    </div>
 </div>
 
-            <!-- Max Tokens -->
-            <div class="setting-group" id="maxTokensGroup">
-                <label class="setting-label">Max Tokens</label>
-                <input type="number" id="maxTokens" class="setting-input" 
-                       value="2000" min="100" max="8000" onchange="saveSettings()">
-            </div>
-            
-            <!-- Frequency Penalty -->
-<div class="setting-group" id="frequencyPenaltyGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <label class="setting-label" style="margin: 0;">Frequency Penalty</label>
-        <span class="range-value" id="frequencyPenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0</span>
+<!-- Max Tokens -->
+<div class="setting-group" id="maxTokensGroup">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+        <label class="setting-label" style="margin: 0; flex: 1;">Max Tokens</label>
+        <input type="number" id="maxTokens" class="setting-input" 
+               value="2000" min="100" max="8000" step="100" 
+               onchange="saveSettings()"
+               style="width: 100px; text-align: center;">
     </div>
-    <input type="range" id="frequencyPenalty" class="setting-range" 
-           min="0" max="1" step="0.05" value="0" 
-           oninput="updateRangeDisplay('frequencyPenalty')" style="width: 100%;">
+    <div class="setting-help">
+        Maximum length of response
+    </div>
+</div>
+
+<!-- Frequency Penalty -->
+<div class="setting-group" id="frequencyPenaltyGroup">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+        <label class="setting-label" style="margin: 0; flex: 1;">Frequency Penalty</label>
+        <input type="number" id="frequencyPenalty" class="setting-input" 
+               value="0" min="0" max="2" step="0.1" 
+               onchange="saveSettings()"
+               style="width: 100px; text-align: center;">
+    </div>
     <div class="setting-help">
         Reduces repetition. Higher = less repetition.
     </div>
@@ -1868,13 +1891,13 @@
 
 <!-- Presence Penalty -->
 <div class="setting-group" id="presencePenaltyGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <label class="setting-label" style="margin: 0;">Presence Penalty</label>
-        <span class="range-value" id="presencePenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+        <label class="setting-label" style="margin: 0; flex: 1;">Presence Penalty</label>
+        <input type="number" id="presencePenalty" class="setting-input" 
+               value="0" min="0" max="2" step="0.1" 
+               onchange="saveSettings()"
+               style="width: 100px; text-align: center;">
     </div>
-    <input type="range" id="presencePenalty" class="setting-range" 
-           min="0" max="1" step="0.05" value="0" 
-           oninput="updateRangeDisplay('presencePenalty')" style="width: 100%;">
     <div class="setting-help">
         Encourages new topics. Higher = more diverse.
     </div>
@@ -1882,19 +1905,17 @@
 
 <!-- Repetition Penalty -->
 <div class="setting-group" id="repetitionPenaltyGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <label class="setting-label" style="margin: 0;">Repetition Penalty</label>
-        <span class="range-value" id="repetitionPenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">1</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+        <label class="setting-label" style="margin: 0; flex: 1;">Repetition Penalty</label>
+        <input type="number" id="repetitionPenalty" class="setting-input" 
+               value="1" min="0.5" max="2" step="0.05" 
+               onchange="saveSettings()"
+               style="width: 100px; text-align: center;">
     </div>
-    <input type="range" id="repetitionPenalty" class="setting-range" 
-           min="0.5" max="1.5" step="0.05" value="1" 
-           oninput="updateRangeDisplay('repetitionPenalty')" style="width: 100%;">
     <div class="setting-help">
         Penalizes repeating tokens. 1 = no penalty.
     </div>
 </div>
-        </div>
-    </div>
 
     <!-- Chat View -->
     <div class="ai-panel-view" id="chatView">
@@ -2852,15 +2873,6 @@ let autoSaveTimer = null;
         loadModels();
     }
 }
-
-        function updateRangeDisplay(type) {
-            const value = document.getElementById(type).value;
-            document.getElementById(type + 'Value').textContent = value;
-            if (!state.currentAgent) {
-                state.settings[type] = parseFloat(value);
-                saveData();
-            }
-        }
 
         function updateModelInfo() {
             const modelId = state.settings.model;
@@ -3838,7 +3850,6 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
                          title="${material.enabled ? 'Enabled - will be sent to AI' : 'Disabled'}"></div>
                     <div class="material-info">
                         <div class="material-name" contenteditable="false">${material.name}</div>
-                        <div class="material-type">${material.type}</div>
                     </div>
                     <div class="material-actions">
                         <button class="delete-btn" title="Delete material">×</button>
@@ -4160,6 +4171,7 @@ function updateMaterialTitle() {
         selector: '#tinymceEditor',
         height: 600,
         menubar: false,
+        resize: false,
         plugins: [
             'lists', 'link', 'charmap', 'anchor',
             'searchreplace', 'visualblocks', 'code', 'fullscreen',
@@ -4845,27 +4857,12 @@ const currentContent = editor.getContent({format: 'text'});
     
     if (apiKeyInput) apiKeyInput.value = state.settings.apiKey || '';
     if (modelSelect) modelSelect.value = state.settings.model;
-    if (temperature) {
-        temperature.value = state.settings.temperature || 0.7;
-        document.getElementById('temperatureValue').textContent = state.settings.temperature || 0.7;
-    }
-    if (topP) {
-        topP.value = state.settings.topP || 0.9;
-        document.getElementById('topPValue').textContent = state.settings.topP || 0.9;
-    }
+    if (temperature) temperature.value = state.settings.temperature || 0.7;
+    if (topP) topP.value = state.settings.topP || 0.9;
     if (maxTokens) maxTokens.value = state.settings.maxTokens || 2000;
-    if (frequencyPenalty) {
-        frequencyPenalty.value = state.settings.frequencyPenalty || 0;
-        document.getElementById('frequencyPenaltyValue').textContent = state.settings.frequencyPenalty || 0;
-    }
-    if (presencePenalty) {
-        presencePenalty.value = state.settings.presencePenalty || 0;
-        document.getElementById('presencePenaltyValue').textContent = state.settings.presencePenalty || 0;
-    }
-    if (repetitionPenalty) {
-        repetitionPenalty.value = state.settings.repetitionPenalty || 1;
-        document.getElementById('repetitionPenaltyValue').textContent = state.settings.repetitionPenalty || 1;
-    }
+    if (frequencyPenalty) frequencyPenalty.value = state.settings.frequencyPenalty || 0;
+    if (presencePenalty) presencePenalty.value = state.settings.presencePenalty || 0;
+    if (repetitionPenalty) repetitionPenalty.value = state.settings.repetitionPenalty || 1;
     
     updateModelInfo();
     updateApiStatus();
@@ -5013,15 +5010,49 @@ function renderChatMessages() {
             </div>
         ` : '';
         
-        return `
-            <div class="${className}">
-                ${msg.content}
-                ${actions}
-            </div>
-        `;
+        const formattedContent = msg.role === 'assistant' ? formatChatMessage(msg.content) : msg.content;
+
+return `
+    <div class="${className}">
+        ${formattedContent}
+        ${actions}
+    </div>
+`;
     }).join('');
     
     container.scrollTop = container.scrollHeight;
+}
+
+function formatChatMessage(content) {
+    // Convert markdown-style formatting to HTML
+    let formatted = content;
+    
+    // Bold: **text** or __text__
+    formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/__(.+?)__/g, '<strong>$1</strong>');
+    
+    // Italic: *text* or _text_
+    formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    formatted = formatted.replace(/_(.+?)_/g, '<em>$1</em>');
+    
+    // Headers: ## Header
+    formatted = formatted.replace(/^### (.+)$/gm, '<h3 style="font-size: 14px; font-weight: 600; margin: 10px 0 5px 0;">$1</h3>');
+    formatted = formatted.replace(/^## (.+)$/gm, '<h2 style="font-size: 15px; font-weight: 600; margin: 12px 0 6px 0;">$1</h2>');
+    
+    // Bullet lists: - item or * item
+    formatted = formatted.replace(/^[•\-\*] (.+)$/gm, '<li style="margin-left: 20px;">$1</li>');
+    
+    // Wrap lists in ul tags
+    formatted = formatted.replace(/(<li[^>]*>.*<\/li>\s*)+/gs, '<ul style="margin: 5px 0; padding-left: 10px;">$&</ul>');
+    
+    // Line breaks
+    formatted = formatted.replace(/\n\n/g, '</p><p style="margin: 8px 0;">');
+    formatted = formatted.replace(/\n/g, '<br>');
+    
+    // Wrap in paragraph
+    formatted = '<p style="margin: 0;">' + formatted + '</p>';
+    
+    return formatted;
 }
         
 async function sendChatMessage() {
