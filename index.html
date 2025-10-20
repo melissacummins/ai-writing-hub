@@ -4455,11 +4455,36 @@ async function parsePDF(file) {
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ');
+        
+        // Build text with better spacing
+        let lastY = null;
+        let pageText = '';
+        
+        textContent.items.forEach(item => {
+            // Check if we're on a new line (Y coordinate changed significantly)
+            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+                pageText += '\n';
+            }
+            
+            // Add space between words if needed
+            if (pageText.length > 0 && !pageText.endsWith(' ') && !pageText.endsWith('\n')) {
+                pageText += ' ';
+            }
+            
+            pageText += item.str;
+            lastY = item.transform[5];
+        });
+        
         fullText += pageText + '\n\n';
     }
     
-    return fullText.trim();
+    // Clean up excessive line breaks and spacing
+    fullText = fullText
+        .replace(/\n{3,}/g, '\n\n')  // Max 2 line breaks
+        .replace(/ {2,}/g, ' ')       // Max 1 space between words
+        .trim();
+    
+    return fullText;
 }
 
 async function parseWord(file) {
