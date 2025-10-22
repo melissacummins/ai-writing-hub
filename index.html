@@ -2507,14 +2507,40 @@ let autoSaveTimer = null;
         // Firebase Data Management
         async function loadUserData() {
             if (!currentUser) return;
-            
+
             try {
                 const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                
+
                 if (userDoc.exists) {
                     const data = userDoc.data();
-                    state = { ...state, ...data };
-                    
+
+                    // Smart merge: keep the most recent version of each material
+                    const mergedMaterials = { ...state.materials };
+                    if (data.materials) {
+                        for (const [id, cloudMaterial] of Object.entries(data.materials)) {
+                            const localMaterial = mergedMaterials[id];
+                            if (!localMaterial) {
+                                // Material only exists in cloud
+                                mergedMaterials[id] = cloudMaterial;
+                            } else {
+                                // Material exists in both - keep the more recent one
+                                const localTime = new Date(localMaterial.modified || localMaterial.created).getTime();
+                                const cloudTime = new Date(cloudMaterial.modified || cloudMaterial.created).getTime();
+                                if (cloudTime > localTime) {
+                                    mergedMaterials[id] = cloudMaterial;
+                                }
+                                // If local is newer, keep it (no action needed)
+                            }
+                        }
+                    }
+
+                    // Merge the rest of the state, preserving merged materials
+                    state = {
+                        ...state,
+                        ...data,
+                        materials: mergedMaterials
+                    };
+
                     // Validate and fix any issues
                     if (!state.settings.model) {
                         state.settings.model = 'anthropic/claude-3.5-sonnet';
@@ -2522,11 +2548,15 @@ let autoSaveTimer = null;
                     if (state.currentAgent && !state.aiAgents[state.currentAgent]) {
                         state.currentAgent = null;
                     }
-                    
+
+                    // Save merged state back to localStorage
+                    localStorage.setItem('aiWritingHub_v5', JSON.stringify(state));
+
                     updateSettingsUI();
+                    console.log('✅ User data loaded and merged');
                 } else {
                     // First time user - initialize with defaults
-                    await saveUserData();
+                    await saveUserData(true);
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
@@ -2535,18 +2565,31 @@ let autoSaveTimer = null;
             }
         }
 
-        async function saveUserData() {
+        async function saveUserData(immediate = false) {
     if (!currentUser) {
         saveData(); // Save to localStorage as fallback
         return;
     }
-    
+
+    // If immediate save is requested, save right away
+    if (immediate) {
+        try {
+            await db.collection('users').doc(currentUser.uid).set(state);
+            saveData(); // Also save to localStorage as backup
+            console.log('✅ Immediate Firebase sync complete at', new Date().toLocaleTimeString());
+        } catch (error) {
+            console.error('Error saving user data:', error);
+            saveData(); // Fall back to localStorage
+        }
+        return;
+    }
+
     // Clear any existing timer
     if (firebaseSaveTimer) {
         clearTimeout(firebaseSaveTimer);
     }
-    
-    // Wait 3 seconds before actually saving to Firebase
+
+    // Wait 1 second before actually saving to Firebase (reduced from 3s)
     firebaseSaveTimer = setTimeout(async () => {
         try {
             await db.collection('users').doc(currentUser.uid).set(state);
@@ -2556,7 +2599,7 @@ let autoSaveTimer = null;
             console.error('Error saving user data:', error);
             saveData(); // Fall back to localStorage
         }
-    }, 3000); // Wait 3 seconds of inactivity before syncing
+    }, 1000); // Wait 1 second of inactivity before syncing (reduced from 3s)
 }
 
        // Initialize
@@ -2639,19 +2682,49 @@ let autoSaveTimer = null;
         }
     });
     
-    // Force save to Firebase when leaving the page
-    window.addEventListener('beforeunload', async (e) => {
-        if (currentUser && firebaseSaveTimer) {
-            // Clear the timer and save immediately
-            clearTimeout(firebaseSaveTimer);
-            
-            try {
-                // Force immediate sync
-                await db.collection('users').doc(currentUser.uid).set(state);
-                console.log('✅ Forced Firebase sync on page unload');
-            } catch (error) {
-                console.error('Error forcing save:', error);
+    // Force save to Firebase when leaving the page or switching tabs
+    // Use multiple events for maximum reliability across browsers
+    const forceSaveOnExit = () => {
+        if (currentUser) {
+            // Clear any pending timer
+            if (firebaseSaveTimer) {
+                clearTimeout(firebaseSaveTimer);
             }
+
+            // Save to localStorage immediately (synchronous)
+            try {
+                localStorage.setItem('aiWritingHub_v5', JSON.stringify(state));
+                console.log('✅ Local save on exit');
+            } catch (error) {
+                console.error('Error in local save:', error);
+            }
+
+            // Attempt Firebase save using sendBeacon for reliability
+            // sendBeacon works even as the page is unloading
+            try {
+                const data = JSON.stringify(state);
+                const blob = new Blob([data], { type: 'application/json' });
+
+                // Note: We can't use Firebase SDK with sendBeacon, so we save synchronously
+                // Instead, we'll use the SDK but won't await it
+                db.collection('users').doc(currentUser.uid).set(state)
+                    .then(() => console.log('✅ Firebase sync on exit'))
+                    .catch((error) => console.error('Error forcing save:', error));
+            } catch (error) {
+                console.error('Error preparing Firebase save:', error);
+            }
+        }
+    };
+
+    // Use both beforeunload and pagehide for better cross-browser support
+    window.addEventListener('beforeunload', forceSaveOnExit);
+    window.addEventListener('pagehide', forceSaveOnExit);
+
+    // Also save when page visibility changes (tab switching)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && currentUser) {
+            // User switched away from tab - save immediately
+            saveUserData(true); // immediate save
         }
     });
 }
@@ -2874,8 +2947,12 @@ let autoSaveTimer = null;
     const hadKey = !!state.settings.apiKey;
     state.settings.apiKey = key;
     saveData();
+    // Immediately sync API key to Firebase (critical for device switching)
+    if (currentUser) {
+        saveUserData(true); // immediate save
+    }
     updateApiStatus();
-    
+
     if (!hadKey && key && state.availableModels.length <= 15) {
         loadModels();
     }
@@ -3821,6 +3898,10 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
     };
 
     saveData();
+    // Immediately sync new material to Firebase
+    if (currentUser) {
+        saveUserData(true); // immediate save
+    }
     renderMaterials();
     closeModal('materialModal');
 
@@ -4066,6 +4147,21 @@ function updateMaterialTitle() {
 }
         
         function selectMaterial(materialId) {
+            // Save current material before switching (if any)
+            if (state.currentMaterial) {
+                const editor = tinymce.get('tinymceEditor');
+                if (editor) {
+                    state.currentMaterial.contentHtml = editor.getContent();
+                    state.currentMaterial.content = editor.getContent({format: 'text'});
+                    state.currentMaterial.modified = new Date().toISOString();
+                    saveData();
+                    // Immediately sync to Firebase when switching materials
+                    if (currentUser) {
+                        saveUserData(true); // immediate save
+                    }
+                }
+            }
+
             const material = state.materials[materialId];
             if (!material) return;
 
@@ -4555,16 +4651,20 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
         function deleteMaterialConfirm(materialId) {
             const material = state.materials[materialId];
             if (!material) return;
-            
+
             if (confirm(`Delete "${material.name}"?`)) {
                 delete state.materials[materialId];
-                
+
                 if (state.currentMaterial?.id === materialId) {
                     state.currentMaterial = null;
                     renderEditor();
                 }
-                
+
                 saveData();
+                // Immediately sync deletion to Firebase
+                if (currentUser) {
+                    saveUserData(true); // immediate save
+                }
                 renderMaterials();
             }
         }
@@ -5094,19 +5194,23 @@ const currentContent = editor.getContent({format: 'text'});
     const hadKey = !!state.settings.apiKey;
     state.settings.apiKey = document.getElementById('settingsApiKey').value.trim();
     state.settings.font = document.getElementById('settingsFont').value;
-    
+
     saveData();
+    // Immediately sync API key to Firebase (critical for device switching)
+    if (currentUser) {
+        saveUserData(true); // immediate save
+    }
     updateApiStatus();
     applyFont();
-    
+
     if (state.currentProject) {
         updateSettingsUI();
     }
-    
+
     if (!hadKey && state.settings.apiKey && state.availableModels.length <= 15) {
         loadModels();
     }
-    
+
     closeModal('settingsModal');
 }
 
@@ -5115,8 +5219,12 @@ const currentContent = editor.getContent({format: 'text'});
     const hadKey = !!state.settings.apiKey;
     state.settings.apiKey = key;
     saveData();
+    // Immediately sync API key to Firebase (critical for device switching)
+    if (currentUser) {
+        saveUserData(true); // immediate save
+    }
     updateApiStatus();
-    
+
     if (!hadKey && key && state.availableModels.length <= 15) {
         loadModels();
     }
