@@ -580,6 +580,29 @@
     padding: 20px;
 }
 
+/* Force visible scrollbar in TinyMCE iframe */
+.tox .tox-edit-area iframe {
+    overflow-y: scroll !important;
+}
+
+/* Custom scrollbar styling for TinyMCE iframe */
+.tox .tox-edit-area__iframe::-webkit-scrollbar {
+    width: 12px;
+}
+
+.tox .tox-edit-area__iframe::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.tox .tox-edit-area__iframe::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
+}
+
+.tox .tox-edit-area__iframe::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 .tox .tox-toolbar {
     background: white !important;
     border-bottom: 1px solid var(--border-color) !important;
