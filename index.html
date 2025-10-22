@@ -3495,6 +3495,22 @@ function saveAgent() {
     closeModal('createAgentModal');
 }
 
+function updateRangeDisplay(id) {
+    const element = document.getElementById(id);
+    const displayElement = document.getElementById(id + 'Value');
+    if (element && displayElement) {
+        displayElement.textContent = element.value;
+    }
+}
+
+function updateAgentRangeDisplay(id) {
+    const element = document.getElementById(id);
+    const displayElement = document.getElementById(id + 'Value');
+    if (element && displayElement) {
+        displayElement.textContent = element.value;
+    }
+}
+
 function updateConfigRangeDisplay(id) {
     const value = document.getElementById(id).value;
     document.getElementById(id + 'Value').textContent = value;
