@@ -2444,6 +2444,8 @@
 let lastAIRequest = null;
 let autoSaveTimer = null;
         let firebaseSaveTimer = null;
+        let firebaseWriteInProgress = false;
+        let pendingFirebaseWrite = false;
 
 
 
@@ -2571,15 +2573,38 @@ let autoSaveTimer = null;
         return;
     }
 
+    // Always save to localStorage immediately as backup
+    saveData();
+
+    // If a write is already in progress, mark that another write is pending
+    if (firebaseWriteInProgress) {
+        pendingFirebaseWrite = true;
+        console.log('⏳ Firebase write queued (write in progress)');
+        return;
+    }
+
     // If immediate save is requested, save right away
     if (immediate) {
+        // Clear any pending debounced writes
+        if (firebaseSaveTimer) {
+            clearTimeout(firebaseSaveTimer);
+            firebaseSaveTimer = null;
+        }
+
+        firebaseWriteInProgress = true;
         try {
             await db.collection('users').doc(currentUser.uid).set(state);
-            saveData(); // Also save to localStorage as backup
             console.log('✅ Immediate Firebase sync complete at', new Date().toLocaleTimeString());
         } catch (error) {
             console.error('Error saving user data:', error);
-            saveData(); // Fall back to localStorage
+        } finally {
+            firebaseWriteInProgress = false;
+
+            // If another write was requested while this one was in progress, schedule it
+            if (pendingFirebaseWrite) {
+                pendingFirebaseWrite = false;
+                setTimeout(() => saveUserData(false), 500); // Schedule with a small delay
+            }
         }
         return;
     }
@@ -2589,17 +2614,25 @@ let autoSaveTimer = null;
         clearTimeout(firebaseSaveTimer);
     }
 
-    // Wait 1 second before actually saving to Firebase (reduced from 3s)
+    // Wait 2 seconds before actually saving to Firebase (balanced between speed and rate limiting)
     firebaseSaveTimer = setTimeout(async () => {
+        firebaseWriteInProgress = true;
         try {
             await db.collection('users').doc(currentUser.uid).set(state);
-            saveData(); // Also save to localStorage as backup
-           console.log('✅ Firebase sync complete at', new Date().toLocaleTimeString());
+            console.log('✅ Firebase sync complete at', new Date().toLocaleTimeString());
         } catch (error) {
             console.error('Error saving user data:', error);
-            saveData(); // Fall back to localStorage
+        } finally {
+            firebaseWriteInProgress = false;
+            firebaseSaveTimer = null;
+
+            // If another write was requested while this one was in progress, schedule it
+            if (pendingFirebaseWrite) {
+                pendingFirebaseWrite = false;
+                setTimeout(() => saveUserData(false), 500); // Schedule with a small delay
+            }
         }
-    }, 1000); // Wait 1 second of inactivity before syncing (reduced from 3s)
+    }, 2000); // Wait 2 seconds of inactivity before syncing (balanced for performance and rate limiting)
 }
 
        // Initialize
@@ -2723,8 +2756,8 @@ let autoSaveTimer = null;
     // Also save when page visibility changes (tab switching)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden && currentUser) {
-            // User switched away from tab - save immediately
-            saveUserData(true); // immediate save
+            // User switched away from tab - trigger debounced save (not immediate to avoid overwhelming Firestore)
+            saveUserData(false); // debounced save
         }
     });
 }
