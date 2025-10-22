@@ -555,29 +555,11 @@
 
         .editor-content {
     flex: 1;
-    overflow-y: scroll; /* Always show scrollbar */
+    overflow-y: auto;
     background: white;
     padding: 0;
     height: 100%;
 }
-
-        /* Custom scrollbar styling for better visibility */
-        .editor-content::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        .editor-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .editor-content::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 6px;
-        }
-
-        .editor-content::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
 
        .editor-card {
     background: white;
@@ -4247,10 +4229,10 @@ function updateMaterialTitle() {
                     state.currentMaterial.content = editor.getContent({format: 'text'});
                     state.currentMaterial.modified = new Date().toISOString();
 
-                    // Save scroll position
-                    const editorContent = document.querySelector('.editor-content');
-                    if (editorContent) {
-                        state.currentMaterial.scrollPosition = editorContent.scrollTop;
+                    // Save scroll position from TinyMCE iframe
+                    const editorWin = editor.getWin();
+                    if (editorWin) {
+                        state.currentMaterial.scrollPosition = editorWin.scrollY || editorWin.pageYOffset || 0;
                     }
 
                     saveData();
@@ -4386,11 +4368,29 @@ function updateMaterialTitle() {
             'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
             'bullist numlist | removeformat | code fullscreen',
         content_style: `
-            body { 
+            body {
                 font-family: ${getFontFamily(state.settings.font)};
                 font-size: 16px;
                 line-height: 1.8;
                 padding: 20px;
+            }
+
+            /* Custom scrollbar styling */
+            ::-webkit-scrollbar {
+                width: 12px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 6px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
             }
         `,
         setup: function(editor) {
@@ -4403,12 +4403,12 @@ function updateMaterialTitle() {
                     editor.setContent(htmlContent);
                 }
 
-                // Restore scroll position
+                // Restore scroll position in the TinyMCE iframe
                 if (state.currentMaterial.scrollPosition !== undefined) {
                     setTimeout(() => {
-                        const editorContent = document.querySelector('.editor-content');
-                        if (editorContent) {
-                            editorContent.scrollTop = state.currentMaterial.scrollPosition;
+                        const editorWin = editor.getWin();
+                        if (editorWin) {
+                            editorWin.scrollTo(0, state.currentMaterial.scrollPosition);
                         }
                     }, 100); // Small delay to ensure content is fully rendered
                 }
