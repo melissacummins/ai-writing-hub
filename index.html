@@ -2591,6 +2591,10 @@ let autoSaveTimer = null;
             firebaseSaveTimer = null;
         }
 
+        // Clear pending flag before starting write to prevent infinite loop
+        const hadPending = pendingFirebaseWrite;
+        pendingFirebaseWrite = false;
+
         firebaseWriteInProgress = true;
         try {
             await db.collection('users').doc(currentUser.uid).set(state);
@@ -2600,22 +2604,40 @@ let autoSaveTimer = null;
         } finally {
             firebaseWriteInProgress = false;
 
-            // If another write was requested while this one was in progress, schedule it
+            // If another write was requested while this one was in progress, trigger one more debounced save
             if (pendingFirebaseWrite) {
                 pendingFirebaseWrite = false;
-                setTimeout(() => saveUserData(false), 500); // Schedule with a small delay
+                // Use debounced save to prevent rapid-fire writes
+                if (!firebaseSaveTimer) {
+                    firebaseSaveTimer = setTimeout(async () => {
+                        firebaseWriteInProgress = true;
+                        try {
+                            await db.collection('users').doc(currentUser.uid).set(state);
+                            console.log('✅ Follow-up Firebase sync complete at', new Date().toLocaleTimeString());
+                        } catch (error) {
+                            console.error('Error saving user data:', error);
+                        } finally {
+                            firebaseWriteInProgress = false;
+                            firebaseSaveTimer = null;
+                            // Don't chain any further - let normal debouncing handle subsequent writes
+                        }
+                    }, 500);
+                }
             }
         }
         return;
     }
 
-    // Clear any existing timer
+    // For debounced saves, clear any existing timer and start a new one
     if (firebaseSaveTimer) {
         clearTimeout(firebaseSaveTimer);
     }
 
     // Wait 2 seconds before actually saving to Firebase (balanced between speed and rate limiting)
     firebaseSaveTimer = setTimeout(async () => {
+        // Clear pending flag before starting write
+        pendingFirebaseWrite = false;
+
         firebaseWriteInProgress = true;
         try {
             await db.collection('users').doc(currentUser.uid).set(state);
@@ -2625,12 +2647,7 @@ let autoSaveTimer = null;
         } finally {
             firebaseWriteInProgress = false;
             firebaseSaveTimer = null;
-
-            // If another write was requested while this one was in progress, schedule it
-            if (pendingFirebaseWrite) {
-                pendingFirebaseWrite = false;
-                setTimeout(() => saveUserData(false), 500); // Schedule with a small delay
-            }
+            // Don't schedule follow-ups - let subsequent calls handle it naturally
         }
     }, 2000); // Wait 2 seconds of inactivity before syncing (balanced for performance and rate limiting)
 }
