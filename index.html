@@ -24,7 +24,10 @@
 
 <!-- Mammoth for Word document parsing -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    
+
+<!-- html-docx-js for Word document generation -->
+<script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
+
     <style>
         :root {
             --primary-color: #667eea;
@@ -4291,18 +4294,56 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
         }
 
         async function exportAsWord(htmlContent, filename, title) {
+            // Check if html-docx-js is loaded
+            if (typeof htmlDocx === 'undefined') {
+                throw new Error('Word document library not loaded. Please refresh the page.');
+            }
+
+            // Create a complete HTML document with proper styling
             const fullHtml = `
                 <!DOCTYPE html>
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
+                <html>
                 <head>
                     <meta charset='utf-8'>
                     <title>${title}</title>
                     <style>
-                        body { font-family: Calibri, sans-serif; font-size: 11pt; line-height: 1.5; }
-                        h1 { font-size: 16pt; font-weight: bold; margin-bottom: 12pt; }
-                        h2 { font-size: 14pt; font-weight: bold; margin-bottom: 10pt; }
-                        h3 { font-size: 12pt; font-weight: bold; margin-bottom: 8pt; }
-                        p { margin-bottom: 10pt; }
+                        body {
+                            font-family: Calibri, Arial, sans-serif;
+                            font-size: 11pt;
+                            line-height: 1.5;
+                            margin: 1in;
+                        }
+                        h1 {
+                            font-size: 16pt;
+                            font-weight: bold;
+                            margin-bottom: 12pt;
+                            color: #000000;
+                        }
+                        h2 {
+                            font-size: 14pt;
+                            font-weight: bold;
+                            margin-bottom: 10pt;
+                            color: #000000;
+                        }
+                        h3 {
+                            font-size: 12pt;
+                            font-weight: bold;
+                            margin-bottom: 8pt;
+                            color: #000000;
+                        }
+                        p {
+                            margin-bottom: 10pt;
+                            color: #000000;
+                        }
+                        strong, b {
+                            font-weight: bold;
+                        }
+                        em, i {
+                            font-style: italic;
+                        }
+                        ul, ol {
+                            margin-bottom: 10pt;
+                        }
                     </style>
                 </head>
                 <body>
@@ -4311,11 +4352,12 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
                 </body>
                 </html>
             `;
-            
-            const blob = new Blob([fullHtml], { 
-                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
-            });
-            const url = URL.createObjectURL(blob);
+
+            // Convert HTML to Word document using html-docx-js
+            const converted = htmlDocx.asBlob(fullHtml);
+
+            // Create download link
+            const url = URL.createObjectURL(converted);
             const a = document.createElement('a');
             a.href = url;
             a.download = filename + '.docx';
