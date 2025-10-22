@@ -2377,13 +2377,58 @@
                     firebase.initializeApp(firebaseConfig);
                     auth = firebase.auth();
                     db = firebase.firestore();
+
+                    // Configure Firestore settings for better offline support
+                    db.settings({
+                        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+                    });
+
+                    // Enable offline persistence
+                    db.enablePersistence({ synchronizeTabs: true })
+                        .then(() => {
+                            console.log('✅ Firestore offline persistence enabled');
+                        })
+                        .catch((err) => {
+                            if (err.code === 'failed-precondition') {
+                                console.warn('⚠️ Persistence failed: Multiple tabs open');
+                            } else if (err.code === 'unimplemented') {
+                                console.warn('⚠️ Persistence not available in this browser');
+                            }
+                        });
+
                     setupAuthObserver();
                     console.log('Firebase initialized successfully');
+
+                    // Test Firestore connectivity
+                    testFirestoreConnection();
                 } else {
                     console.error('Firebase SDK not loaded');
                 }
             } catch (error) {
                 console.error('Firebase initialization error:', error);
+            }
+        }
+
+        // Test Firestore connectivity
+        async function testFirestoreConnection() {
+            try {
+                // Try to read from Firestore with a short timeout
+                const testDoc = await Promise.race([
+                    db.collection('_connection_test').doc('test').get(),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Connection timeout')), 5000)
+                    )
+                ]);
+                console.log('✅ Firestore connection successful');
+            } catch (error) {
+                if (error.message === 'Connection timeout' || error.code === 'unavailable') {
+                    console.warn('⚠️ Firestore is offline - Check your internet connection or Firebase Console setup');
+                    console.warn('📋 To fix: Ensure Firestore database is created in Firebase Console (https://console.firebase.google.com)');
+                } else if (error.code === 'permission-denied') {
+                    console.warn('⚠️ Firestore access denied - Check security rules in Firebase Console');
+                } else {
+                    console.warn('⚠️ Firestore connection issue:', error.message);
+                }
             }
         }
 
@@ -2561,8 +2606,13 @@ let autoSaveTimer = null;
                     await saveUserData(true);
                 }
             } catch (error) {
-                console.error('Error loading user data:', error);
-                // Fall back to localStorage
+                // Check if it's an offline error
+                if (error.code === 'unavailable' || error.message?.includes('offline') || error.message?.includes('backend')) {
+                    console.log('📱 Working in offline mode - using locally saved data. Changes will sync when connection is restored.');
+                } else {
+                    console.error('Error loading user data:', error);
+                }
+                // Fall back to localStorage - app continues to work normally
                 loadData();
             }
         }
