@@ -555,11 +555,29 @@
 
         .editor-content {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll; /* Always show scrollbar */
     background: white;
     padding: 0;
     height: 100%;
 }
+
+        /* Custom scrollbar styling for better visibility */
+        .editor-content::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .editor-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .editor-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 6px;
+        }
+
+        .editor-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
 
        .editor-card {
     background: white;
@@ -4228,6 +4246,13 @@ function updateMaterialTitle() {
                     state.currentMaterial.contentHtml = editor.getContent();
                     state.currentMaterial.content = editor.getContent({format: 'text'});
                     state.currentMaterial.modified = new Date().toISOString();
+
+                    // Save scroll position
+                    const editorContent = document.querySelector('.editor-content');
+                    if (editorContent) {
+                        state.currentMaterial.scrollPosition = editorContent.scrollTop;
+                    }
+
                     saveData();
                     // Immediately sync to Firebase when switching materials
                     if (currentUser) {
@@ -4377,7 +4402,17 @@ function updateMaterialTitle() {
                     const htmlContent = state.currentMaterial.content.replace(/\n/g, '<br>');
                     editor.setContent(htmlContent);
                 }
-                
+
+                // Restore scroll position
+                if (state.currentMaterial.scrollPosition !== undefined) {
+                    setTimeout(() => {
+                        const editorContent = document.querySelector('.editor-content');
+                        if (editorContent) {
+                            editorContent.scrollTop = state.currentMaterial.scrollPosition;
+                        }
+                    }, 100); // Small delay to ensure content is fully rendered
+                }
+
                 // Update API status
                 updateApiStatus();
                 updateTokenCount();
