@@ -2569,12 +2569,21 @@ let autoSaveTimer = null;
 
         async function saveUserData(immediate = false) {
     if (!currentUser) {
-        saveData(); // Save to localStorage as fallback
+        // Save to localStorage directly (don't call saveData to avoid recursion)
+        try {
+            localStorage.setItem('aiWritingHub_v5', JSON.stringify(state));
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
+        }
         return;
     }
 
-    // Always save to localStorage immediately as backup
-    saveData();
+    // Always save to localStorage immediately as backup (save directly to avoid recursion)
+    try {
+        localStorage.setItem('aiWritingHub_v5', JSON.stringify(state));
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
 
     // If a write is already in progress, mark that another write is pending
     if (firebaseWriteInProgress) {
