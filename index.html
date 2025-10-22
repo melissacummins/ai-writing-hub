@@ -4120,6 +4120,9 @@ function updateMaterialTitle() {
                             <div class="export-menu-item" onclick="exportMaterial('pdf')">
                                 📕 PDF Document (.pdf)
                             </div>
+                            <div class="export-menu-item" onclick="exportMaterial('html')">
+                                🌐 HTML Document (.html)
+                            </div>
                             <div class="export-menu-item" onclick="exportMaterial('txt')">
                                 📝 Text File (.txt)
                             </div>
@@ -4275,6 +4278,9 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
                     case 'pdf':
                         await exportAsPDF(htmlContent, filename, material.name);
                         break;
+                    case 'html':
+                        exportAsHTML(htmlContent, filename, material.name);
+                        break;
                 }
             } catch (error) {
                 alert('Export error: ' + error.message);
@@ -4287,6 +4293,129 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
             const a = document.createElement('a');
             a.href = url;
             a.download = filename + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAsHTML(htmlContent, filename, title) {
+            // Create a complete HTML document with styling
+            const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1 {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 0.5em;
+            color: #1a1a1a;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.3em;
+        }
+        h2 {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            color: #2a2a2a;
+        }
+        h3 {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            color: #3a3a3a;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        ul, ol {
+            margin-bottom: 1em;
+            padding-left: 2em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        blockquote {
+            border-left: 4px solid #e0e0e0;
+            padding-left: 1em;
+            margin-left: 0;
+            color: #666;
+            font-style: italic;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 1em;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1em 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 20mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>${title}</h1>
+    ${htmlContent}
+</body>
+</html>`;
+
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename + '.html';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -4504,44 +4633,165 @@ async function parsePDF(file) {
     if (typeof pdfjsLib === 'undefined') {
         throw new Error('PDF library not loaded');
     }
-    
+
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
+
     let fullText = '';
-    
+
+    // Common bullet point characters and their replacements
+    const bulletPoints = {
+        '\u2022': '• ',  // Bullet
+        '\u2023': '• ',  // Triangular bullet
+        '\u25E6': '• ',  // White bullet
+        '\u2043': '• ',  // Hyphen bullet
+        '\u2219': '• ',  // Bullet operator
+        '\u25AA': '• ',  // Black small square
+        '\u25AB': '• ',  // White small square
+        '\u25CF': '• ',  // Black circle
+        '\u25CB': '○ ',  // White circle
+        '\u25A0': '■ ',  // Black square
+        '\u25A1': '□ ',  // White square
+        '\u2713': '✓ ',  // Check mark
+        '\u2714': '✓ ',  // Heavy check mark
+        '\u2717': '✗ ',  // Ballot X
+        '\u2718': '✗ ',  // Heavy ballot X
+        '\uF0B7': '• ',  // Private use bullet (common in PDFs)
+        '\uF0A7': '• ',  // Private use bullet
+        '\u00B7': '· ',  // Middle dot
+    };
+
+    // Special symbol replacements for common problematic characters
+    const symbolReplacements = {
+        '\uFFFD': '',     // Replacement character (displayed as rectangle) - remove
+        '\u0000': '',     // Null character - remove
+        '\u00A0': ' ',    // Non-breaking space
+        '\u2010': '-',    // Hyphen
+        '\u2011': '-',    // Non-breaking hyphen
+        '\u2012': '-',    // Figure dash
+        '\u2013': '-',    // En dash
+        '\u2014': '—',    // Em dash
+        '\u2018': "'",    // Left single quote
+        '\u2019': "'",    // Right single quote
+        '\u201A': "'",    // Single low quote
+        '\u201B': "'",    // Single high reversed quote
+        '\u201C': '"',    // Left double quote
+        '\u201D': '"',    // Right double quote
+        '\u201E': '"',    // Double low quote
+        '\u2026': '...',  // Ellipsis
+        '\u2032': "'",    // Prime
+        '\u2033': '"',    // Double prime
+    };
+
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        
-        // Build text with better spacing
+
+        // Build text with better spacing and formatting detection
         let lastY = null;
+        let lastX = null;
         let pageText = '';
-        
-        textContent.items.forEach(item => {
+        let currentLine = '';
+        let lines = [];
+
+        textContent.items.forEach((item, index) => {
+            const y = item.transform[5];
+            const x = item.transform[4];
+            let text = item.str;
+
+            // Replace problematic symbols and bullet points
+            for (const [char, replacement] of Object.entries(symbolReplacements)) {
+                text = text.replace(new RegExp(char, 'g'), replacement);
+            }
+            for (const [char, replacement] of Object.entries(bulletPoints)) {
+                text = text.replace(new RegExp(char, 'g'), replacement);
+            }
+
+            // Skip empty or whitespace-only items after replacement
+            if (!text.trim()) {
+                return;
+            }
+
             // Check if we're on a new line (Y coordinate changed significantly)
-            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
-                pageText += '\n';
+            if (lastY !== null && Math.abs(y - lastY) > 5) {
+                if (currentLine.trim()) {
+                    lines.push(currentLine.trim());
+                }
+                currentLine = '';
+                lastX = null;
             }
-            
+
             // Add space between words if needed
-            if (pageText.length > 0 && !pageText.endsWith(' ') && !pageText.endsWith('\n')) {
-                pageText += ' ';
+            // Check horizontal spacing to determine if space is needed
+            if (currentLine.length > 0 && lastX !== null) {
+                const horizontalGap = Math.abs(x - lastX);
+                if (horizontalGap > 1 && !currentLine.endsWith(' ') && !currentLine.endsWith('\n')) {
+                    currentLine += ' ';
+                }
             }
-            
-            pageText += item.str;
-            lastY = item.transform[5];
+
+            currentLine += text;
+            lastY = y;
+            lastX = x + (item.width || 0);
         });
-        
+
+        // Add the last line
+        if (currentLine.trim()) {
+            lines.push(currentLine.trim());
+        }
+
+        // Join lines and try to detect paragraphs and lists
+        for (let j = 0; j < lines.length; j++) {
+            const line = lines[j];
+            const nextLine = j < lines.length - 1 ? lines[j + 1] : '';
+
+            // Detect if this is a list item (starts with bullet or number)
+            const isBulletItem = /^[•○■□✓✗·\-\*]\s/.test(line);
+            const isNumberedItem = /^\d+[\.\)]\s/.test(line);
+            const isListItem = isBulletItem || isNumberedItem;
+
+            pageText += line;
+
+            // Determine line ending based on context
+            if (j < lines.length - 1) {
+                // Check if next line is also a list item
+                const nextIsBullet = /^[•○■□✓✗·\-\*]\s/.test(nextLine);
+                const nextIsNumbered = /^\d+[\.\)]\s/.test(nextLine);
+                const nextIsListItem = nextIsBullet || nextIsNumbered;
+
+                // If current line ends with sentence-ending punctuation, start new paragraph
+                if (/[.!?;:]$/.test(line) && !nextIsListItem) {
+                    pageText += '\n\n';
+                }
+                // If this is a list item and next is not, add paragraph break
+                else if (isListItem && !nextIsListItem && j < lines.length - 1) {
+                    pageText += '\n\n';
+                }
+                // If this is not a list item and next is, add paragraph break
+                else if (!isListItem && nextIsListItem) {
+                    pageText += '\n\n';
+                }
+                // Both are list items, just line break
+                else if (isListItem || nextIsListItem) {
+                    pageText += '\n';
+                }
+                // Default: single line break
+                else {
+                    pageText += '\n';
+                }
+            }
+        }
+
         fullText += pageText + '\n\n';
     }
-    
+
     // Clean up excessive line breaks and spacing
     fullText = fullText
-        .replace(/\n{3,}/g, '\n\n')  // Max 2 line breaks
+        .replace(/\n{4,}/g, '\n\n')  // Max 2 consecutive line breaks
         .replace(/ {2,}/g, ' ')       // Max 1 space between words
+        .replace(/\t+/g, ' ')         // Replace tabs with spaces
         .trim();
-    
+
     return fullText;
 }
 
