@@ -2569,21 +2569,12 @@ let autoSaveTimer = null;
 
         async function saveUserData(immediate = false) {
     if (!currentUser) {
-        // Save to localStorage directly (don't call saveData to avoid recursion)
-        try {
-            localStorage.setItem('aiWritingHub_v5', JSON.stringify(state));
-        } catch (error) {
-            console.error('Error saving to localStorage:', error);
-        }
+        // No user logged in, nothing to sync to Firebase
         return;
     }
 
-    // Always save to localStorage immediately as backup (save directly to avoid recursion)
-    try {
-        localStorage.setItem('aiWritingHub_v5', JSON.stringify(state));
-    } catch (error) {
-        console.error('Error saving to localStorage:', error);
-    }
+    // Note: saveData() should be called before saveUserData() to save to localStorage
+    // This function only handles Firebase syncing to avoid duplicate JSON.stringify calls
 
     // If a write is already in progress, mark that another write is pending
     if (firebaseWriteInProgress) {
@@ -2825,9 +2816,8 @@ let autoSaveTimer = null;
         function saveData() {
             try {
                 localStorage.setItem('aiWritingHub_v5', JSON.stringify(state));
-                if (currentUser) {
-                    saveUserData();
-                }
+                // Note: saveData only saves to localStorage
+                // Callers should explicitly call saveUserData() if Firebase sync is needed
             } catch (error) {
                 console.error('Error saving data:', error);
             }
@@ -3921,6 +3911,9 @@ function manageConfigurations() {
             state.recentProjects = state.recentProjects.slice(0, 10);
 
             saveData();
+            if (currentUser) {
+                saveUserData(false); // debounced Firebase sync
+            }
 
             document.getElementById('dashboardView').style.display = 'none';
             document.getElementById('workspaceView').style.display = 'flex';
@@ -4191,7 +4184,10 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
                 material.name = newName;
                 material.modified = new Date().toISOString();
                 saveData();
-                
+                if (currentUser) {
+                    saveUserData(false); // debounced Firebase sync
+                }
+
                 if (state.currentMaterial?.id === materialId) {
                     state.currentMaterial = material;
                     renderEditor();
@@ -4214,6 +4210,9 @@ function updateMaterialTitle() {
         state.currentMaterial.name = newTitle;
         state.currentMaterial.modified = new Date().toISOString();
         saveData();
+        if (currentUser) {
+            saveUserData(false); // debounced Firebase sync
+        }
         renderMaterials(); // Update sidebar to show new name
     } else if (!newTitle) {
         // Don't allow empty titles
@@ -4415,6 +4414,9 @@ function updateMaterialTitle() {
             if (material) {
                 material.enabled = !material.enabled;
                 saveData();
+                if (currentUser) {
+                    saveUserData(false); // debounced Firebase sync
+                }
                 renderMaterials();
             }
         }
@@ -4712,7 +4714,7 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
 
         function autoSaveTinyMCE() {
     if (!state.currentMaterial) return;
-    
+
     const editor = tinymce.get('tinymceEditor');
     if (!editor) return;
 
@@ -4720,6 +4722,9 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
     state.currentMaterial.content = editor.getContent({format: 'text'});
     state.currentMaterial.modified = new Date().toISOString();
     saveData();
+    if (currentUser) {
+        saveUserData(false); // debounced Firebase sync
+    }
     updateTokenCount();
 }
         
