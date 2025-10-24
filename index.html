@@ -412,14 +412,14 @@
 }
 
         .materials-panel {
-    width: 280px;
+    width: 400px;
     background: var(--card-bg);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
 }
         .materials-header {
-            padding: 20px;
+            padding: 15px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -427,20 +427,100 @@
             margin-bottom: 15px;
         }
 
+        /* Left Panel Tabs */
+        .left-panel-tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .left-panel-tab {
+            flex: 1;
+            padding: 10px 8px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 11px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .left-panel-tab:hover {
+            color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .left-panel-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: white;
+        }
+
+        /* Left Panel Content Areas */
+        .left-panel-content {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .left-panel-content.active {
+            display: flex;
+        }
+
+        /* Collapsible Sections */
+        .collapsible-section {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .collapsible-header {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .collapsible-header:hover {
+            background: #e9ecef;
+        }
+
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+        }
+
+        /* Compact Materials List */
+        .materials-list-compact {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px 10px;
+        }
+
         .materials-list {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 10px;
         }
 
         .material-item {
             display: flex;
             align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 8px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
             background: white;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -456,11 +536,11 @@
         }
 
         .material-toggle {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border: 2px solid var(--border-color);
-            border-radius: 4px;
-            margin-right: 12px;
+            border-radius: 3px;
+            margin-right: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -477,7 +557,7 @@
 
         .material-toggle.enabled::after {
             content: '✓';
-            font-size: 14px;
+            font-size: 10px;
         }
 
         .material-info {
@@ -487,6 +567,7 @@
 
         .material-name {
     font-weight: 500;
+    font-size: 12px;
     margin-bottom: 2px;
     white-space: normal;
     word-wrap: break-word;
@@ -495,8 +576,48 @@
     cursor: text;
     padding: 2px 4px;
     border-radius: 3px;
-    /* Remove the hover background that was causing the shadow */
-}
+        }
+
+        /* Compact Chat List */
+        .chats-list-compact {
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px 10px;
+        }
+
+        .chat-item-compact {
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-item-compact:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .chat-item-compact.active {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .chat-item-name {
+            font-weight: 500;
+            font-size: 12px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item-meta {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
 
 .material-name.editing {
     background: white;
@@ -559,7 +680,24 @@
     background: white;
     padding: 0;
     height: 100%;
-}
+        }
+
+        .editor-content::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .editor-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .editor-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 6px;
+        }
+
+        .editor-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
 
        .editor-card {
     background: white;
@@ -1693,6 +1831,10 @@
                 <div class="sync-dot"></div>
                 <span>Synced</span>
             </div>
+            <div class="api-status" style="margin-left: 10px;">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">API Not Connected</span>
+            </div>
             <button class="btn btn-outline" onclick="showSettings()">⚙️ Settings</button>
             <button class="btn btn-outline" onclick="showAgentManager()">🤖 AI Agents</button>
             <button class="btn btn-outline" onclick="showPromptLibrary()">📚 Prompts</button>
@@ -1737,37 +1879,287 @@
     <!-- Workspace View -->
     <div class="workspace-view" id="workspaceView">
         <div class="workspace-content">
-            <!-- Materials Panel -->
+            <!-- Left Panel with Tabs -->
             <div class="materials-panel">
+                <!-- Header -->
                 <div class="materials-header">
-    <button class="back-btn" onclick="returnToDashboard()" style="margin-bottom: 15px; padding: 8px 12px; width: 100%; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-    ← Back to Dashboard
-</button>
-    
-    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid var(--primary-color);">
-        <h2 id="sidebarProjectName" style="font-size: 20px; font-weight: 700; margin-bottom: 3px;">Project Name</h2>
-        <p id="sidebarProjectCategory" style="font-size: 12px; color: var(--text-secondary); margin: 0;">Category</p>
-    </div>
-    
-    <h3 style="margin-bottom: 15px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Materials</h3>
-    
-    <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="showAddMaterialModal()">
-        + Add Material
-    </button>
-    <button class="btn btn-outline" style="width: 100%; margin-bottom: 15px;" onclick="showUploadModal()">
-        📤 Upload File
-    </button>
-    
-    <div style="text-align: center;">
-    <span id="enabledCount" style="display: inline-block; background: var(--secondary-color); color: white; padding: 6px 14px; border-radius: 16px; font-size: 11px; font-weight: 600;">
-        ✓ 0 materials enabled
-    </span>
-</div>
-</div>
-                <div class="materials-list" id="materialsList">
-                    <div class="empty-state">
-                        <div class="empty-icon" style="font-size: 32px;">📄</div>
-                        <p>No materials yet</p>
+                    <button class="back-btn" onclick="returnToDashboard()" style="margin-bottom: 10px; padding: 8px 12px; width: 100%; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                        ← Back to Dashboard
+                    </button>
+
+                    <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid var(--primary-color);">
+                        <h2 id="sidebarProjectName" style="font-size: 18px; font-weight: 700; margin-bottom: 2px;">Project Name</h2>
+                        <p id="sidebarProjectCategory" style="font-size: 11px; color: var(--text-secondary); margin: 0;">Category</p>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="left-panel-tabs">
+                        <button class="left-panel-tab active" onclick="switchLeftPanelTab('materials')">📄 Materials</button>
+                        <button class="left-panel-tab" onclick="switchLeftPanelTab('chats')">💬 Chats</button>
+                        <button class="left-panel-tab" onclick="switchLeftPanelTab('settings')">⚙️ Settings</button>
+                    </div>
+                </div>
+
+                <!-- Materials Tab Content -->
+                <div class="left-panel-content active" id="materialsTabContent">
+                    <!-- Collapsible Materials Section -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleMaterialsCollapse()">
+                            <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Materials</span>
+                            <span id="materialsCollapseIcon">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="materialsCollapsibleContent">
+                            <div style="padding: 10px 15px;">
+                                <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px; font-size: 12px; padding: 8px;" onclick="showAddMaterialModal()">
+                                    + Add Material
+                                </button>
+                                <button class="btn btn-outline" style="width: 100%; margin-bottom: 10px; font-size: 12px; padding: 8px;" onclick="showUploadModal()">
+                                    📤 Upload File
+                                </button>
+
+                                <div style="text-align: center; margin-bottom: 10px;">
+                                    <span id="enabledCount" style="display: inline-block; background: var(--secondary-color); color: white; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">
+                                        ✓ 0 materials enabled
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="materials-list-compact" id="materialsList">
+                                <div class="empty-state">
+                                    <div class="empty-icon" style="font-size: 24px;">📄</div>
+                                    <p style="font-size: 12px;">No materials yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chats Section -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header">
+                            <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Chats</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <div style="padding: 10px 15px;">
+                                <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px; font-size: 12px; padding: 8px;" onclick="createNewChat(); switchLeftPanelTab('chats')">
+                                    + New Chat
+                                </button>
+                            </div>
+
+                            <div class="chats-list-compact" id="chatsListCompact">
+                                <div class="empty-state">
+                                    <div class="empty-icon" style="font-size: 24px;">💬</div>
+                                    <p style="font-size: 12px;">No chats yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chats Tab Content -->
+                <div class="left-panel-content" id="chatsTabContent">
+                    <!-- Chat Selector Header -->
+                    <div style="padding: 12px 15px; border-bottom: 1px solid var(--border-color); background: white;">
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+                            <select id="chatSelector" class="setting-select" onchange="switchChatFromDropdown()" style="flex: 1; padding: 6px; font-size: 12px;">
+                                <option value="">Select a chat...</option>
+                            </select>
+                            <button class="btn btn-small btn-primary" onclick="createNewChat()" style="padding: 5px 10px; font-size: 12px;">+ New</button>
+                            <button class="icon-btn" onclick="showChatActionsMenu(event)" title="Chat actions" style="font-size: 16px;">⋮</button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Actions Menu (hidden by default) -->
+                    <div class="context-menu" id="chatActionsMenu">
+                        <div class="context-menu-item" onclick="renameCurrentChat()">✏️ Rename Chat</div>
+                        <div class="context-menu-item" onclick="pinCurrentChat()">📌 Toggle Pin</div>
+                        <div class="divider"></div>
+                        <div class="context-menu-item" onclick="deleteCurrentChat()">🗑️ Delete Chat</div>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-empty">
+                            <div class="chat-empty-icon">💬</div>
+                            <h3 style="font-size: 14px;">Start a Conversation</h3>
+                            <p style="font-size: 12px;">Ask questions, brainstorm ideas, or get feedback</p>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="chat-context-info" id="chatContextInfo">
+                            Context: No materials enabled
+                        </div>
+                        <div class="chat-input-wrapper">
+                            <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
+                            <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
+                        </div>
+                        <div class="chat-actions">
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer;">
+                                <input type="checkbox" id="chatUseThinking" style="cursor: pointer;">
+                                <span>Extended Thinking</span>
+                            </label>
+                            <button class="btn btn-small btn-outline" onclick="clearChat()" style="font-size: 11px; padding: 4px 8px;">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab Content -->
+                <div class="left-panel-content" id="settingsTabContent">
+                    <div class="ai-panel-content" style="padding: 15px;">
+                        <!-- Agent Selector (Optional Override) -->
+                        <div class="agent-selector">
+                            <label class="agent-selector-label">Use AI Agent (Optional)</label>
+                            <div class="agent-select-wrapper">
+                                <select id="agentSelect" class="agent-select" onchange="switchAgent()">
+                                    <option value="">Manual Settings</option>
+                                </select>
+                                <button class="btn btn-small btn-outline" onclick="showAgentManager()">⚙️</button>
+                            </div>
+
+                            <!-- Configuration Selector (shows when agent selected) -->
+                            <div id="configSelector" style="display: none; margin-top: 10px;">
+                                <label style="font-size: 10px; font-weight: 600; color: var(--primary-dark); display: block; margin-bottom: 5px;">MODEL CONFIGURATION</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <select id="configSelect" class="agent-select" onchange="switchConfiguration()" style="flex: 1;">
+                                        <option value="">Select configuration...</option>
+                                    </select>
+                                    <button class="btn btn-small btn-outline" onclick="manageConfigurations()" title="Manage configurations">⚙️</button>
+                                </div>
+                            </div>
+
+                            <div class="agent-info-box" id="agentInfoBox" style="display: none;">
+                                <div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px;">
+                                    Active configuration will override manual settings
+                                </div>
+                                <div class="agent-info-row">
+                                    <span class="agent-info-label">Model:</span>
+                                    <span id="agentInfoModel">-</span>
+                                </div>
+                                <div class="agent-info-row">
+                                    <span class="agent-info-label">Temperature:</span>
+                                    <span id="agentInfoTemp">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Model -->
+                        <div class="setting-group" id="modelGroup">
+                            <label class="setting-label">AI Model</label>
+                            <select id="modelSelect" class="setting-select" onchange="onModelChange()">
+                                <option value="">Loading models...</option>
+                            </select>
+                            <button class="btn btn-outline" style="width: 100%; margin-top: 8px; font-size: 12px; padding: 8px;" onclick="showModelManager()">
+                                📋 Manage Models
+                            </button>
+                            <div id="modelInfo" style="font-size: 10px; color: var(--text-secondary); margin-top: 5px; display: none;">
+                                <div id="modelPrice"></div>
+                                <div id="modelContext"></div>
+                            </div>
+                        </div>
+
+                        <!-- All the other settings from the original AI panel -->
+                        <div class="setting-group" id="temperatureGroup">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                                <label class="setting-label" style="margin: 0; flex: 1;">Temperature</label>
+                                <input type="number" id="temperature" class="setting-input"
+                                       value="0.7" min="0" max="2" step="0.1"
+                                       onchange="saveSettings()"
+                                       style="width: 80px; text-align: center;">
+                            </div>
+                            <div class="setting-help">
+                                Controls creativity (0 = deterministic, 2 = very creative)
+                            </div>
+                        </div>
+
+                        <div class="setting-group" id="topPGroup">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                                <label class="setting-label" style="margin: 0; flex: 1;">Top P</label>
+                                <input type="number" id="topP" class="setting-input"
+                                       value="0.9" min="0" max="1" step="0.05"
+                                       onchange="saveSettings()"
+                                       style="width: 80px; text-align: center;">
+                            </div>
+                            <div class="setting-help">
+                                Controls randomness (0 to 1)
+                            </div>
+                        </div>
+
+                        <div class="setting-group" id="maxTokensGroup">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                                <label class="setting-label" style="margin: 0; flex: 1;">Max Tokens</label>
+                                <input type="number" id="maxTokens" class="setting-input"
+                                       value="2000" min="100" max="8000" step="100"
+                                       onchange="saveSettings()"
+                                       style="width: 80px; text-align: center;">
+                            </div>
+                            <div class="setting-help">
+                                Maximum length of response
+                            </div>
+                        </div>
+
+                        <div class="setting-group" id="frequencyPenaltyGroup">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                                <label class="setting-label" style="margin: 0; flex: 1;">Frequency Penalty</label>
+                                <input type="number" id="frequencyPenalty" class="setting-input"
+                                       value="0" min="0" max="2" step="0.1"
+                                       onchange="saveSettings()"
+                                       style="width: 80px; text-align: center;">
+                            </div>
+                            <div class="setting-help">
+                                Reduces repetition. Higher = less repetition.
+                            </div>
+                        </div>
+
+                        <div class="setting-group" id="presencePenaltyGroup">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                                <label class="setting-label" style="margin: 0; flex: 1;">Presence Penalty</label>
+                                <input type="number" id="presencePenalty" class="setting-input"
+                                       value="0" min="0" max="2" step="0.1"
+                                       onchange="saveSettings()"
+                                       style="width: 80px; text-align: center;">
+                            </div>
+                            <div class="setting-help">
+                                Encourages new topics. Higher = more diverse.
+                            </div>
+                        </div>
+
+                        <div class="setting-group" id="repetitionPenaltyGroup">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                                <label class="setting-label" style="margin: 0; flex: 1;">Repetition Penalty</label>
+                                <input type="number" id="repetitionPenalty" class="setting-input"
+                                       value="1" min="0.5" max="2" step="0.05"
+                                       onchange="saveSettings()"
+                                       style="width: 80px; text-align: center;">
+                            </div>
+                            <div class="setting-help">
+                                Penalizes repeating tokens. 1 = no penalty.
+                            </div>
+                        </div>
+
+                        <!-- Prompt Caching -->
+                        <div class="setting-group" id="promptCachingGroup">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="usePromptCaching"
+                                       onchange="saveSettings()"
+                                       style="width: 16px; height: 16px; cursor: pointer;">
+                                <label for="usePromptCaching" class="setting-label" style="margin: 0; cursor: pointer;">Enable Prompt Caching</label>
+                            </div>
+                            <div class="setting-help">
+                                Caches system prompts for faster and cheaper API calls
+                            </div>
+                        </div>
+
+                        <!-- Extended Thinking -->
+                        <div class="setting-group" id="extendedThinkingGroup">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="useExtendedThinking"
+                                       onchange="saveSettings()"
+                                       style="width: 16px; height: 16px; cursor: pointer;">
+                                <label for="useExtendedThinking" class="setting-label" style="margin: 0; cursor: pointer;">Enable Extended Thinking</label>
+                            </div>
+                            <div class="setting-help">
+                                AI will show its reasoning process (works with select models)
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1784,213 +2176,7 @@
                         </div>
                     </div>
               </div>
-                
-                <div class="status-bar">
-    <div class="api-status">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">API Not Connected</span>
-    </div>
-    <span id="tokenCount">Ready</span>
-    <span style="background: var(--primary-light); color: var(--primary-color); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 500;">
-        ⌨️ Ctrl+Enter: Send to AI • Ctrl+Shift+Enter: Continue
-    </span>
-</div>
             </div>
-
-            <!-- AI Settings Panel -->
-<div class="ai-panel" id="aiPanel">
-    <div class="ai-panel-tabs">
-        <button class="ai-panel-tab active" onclick="switchAITab('settings')">⚙️ Settings</button>
-        <button class="ai-panel-tab" onclick="switchAITab('chat')">💬 Chat</button>
-    </div>
-
-    <!-- Settings View -->
-    <div class="ai-panel-view active" id="settingsView">
-        <div class="ai-panel-header">
-            <h3>🤖 AI Assistant</h3>
-        </div>
-        <div class="ai-panel-content">
-            <!-- Agent Selector (Optional Override) -->
-            <div class="agent-selector">
-                <label class="agent-selector-label">Use AI Agent (Optional)</label>
-                <div class="agent-select-wrapper">
-                    <select id="agentSelect" class="agent-select" onchange="switchAgent()">
-                        <option value="">Manual Settings</option>
-                    </select>
-                    <button class="btn btn-small btn-outline" onclick="showAgentManager()">⚙️</button>
-                </div>
-                
-                <!-- Configuration Selector (shows when agent selected) -->
-                <div id="configSelector" style="display: none; margin-top: 10px;">
-                    <label style="font-size: 11px; font-weight: 600; color: var(--primary-dark); display: block; margin-bottom: 5px;">MODEL CONFIGURATION</label>
-                    <div style="display: flex; gap: 8px;">
-                        <select id="configSelect" class="agent-select" onchange="switchConfiguration()" style="flex: 1;">
-                            <option value="">Select configuration...</option>
-                        </select>
-                        <button class="btn btn-small btn-outline" onclick="manageConfigurations()" title="Manage configurations">⚙️</button>
-                    </div>
-                </div>
-                
-                <div class="agent-info-box" id="agentInfoBox" style="display: none;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
-                        Active configuration will override manual settings
-                    </div>
-                    <div class="agent-info-row">
-                        <span class="agent-info-label">Model:</span>
-                        <span id="agentInfoModel">-</span>
-                    </div>
-                    <div class="agent-info-row">
-                        <span class="agent-info-label">Temperature:</span>
-                        <span id="agentInfoTemp">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Model -->
-            <div class="setting-group" id="modelGroup">
-                <label class="setting-label">AI Model</label>
-                <select id="modelSelect" class="setting-select" onchange="onModelChange()">
-                    <option value="">Loading models...</option>
-                </select>
-                <button class="btn btn-outline" style="width: 100%; margin-top: 8px;" onclick="showModelManager()">
-                    📋 Manage Models
-                </button>
-                <div id="modelInfo" style="font-size: 11px; color: var(--text-secondary); margin-top: 5px; display: none;">
-                    <div id="modelPrice"></div>
-                    <div id="modelContext"></div>
-                </div>
-            </div>
-
-            <!-- Temperature -->
-<div class="setting-group" id="temperatureGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <label class="setting-label" style="margin: 0; flex: 1;">Temperature</label>
-        <input type="number" id="temperature" class="setting-input" 
-               value="0.7" min="0" max="2" step="0.1" 
-               onchange="saveSettings()"
-               style="width: 100px; text-align: center;">
-    </div>
-    <div class="setting-help">
-        Controls creativity (0 = deterministic, 2 = very creative)
-    </div>
-</div>
-
-<!-- Top P -->
-<div class="setting-group" id="topPGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <label class="setting-label" style="margin: 0; flex: 1;">Top P</label>
-        <input type="number" id="topP" class="setting-input" 
-               value="0.9" min="0" max="1" step="0.05" 
-               onchange="saveSettings()"
-               style="width: 100px; text-align: center;">
-    </div>
-    <div class="setting-help">
-        Controls randomness (0 to 1)
-    </div>
-</div>
-
-<!-- Max Tokens -->
-<div class="setting-group" id="maxTokensGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <label class="setting-label" style="margin: 0; flex: 1;">Max Tokens</label>
-        <input type="number" id="maxTokens" class="setting-input" 
-               value="2000" min="100" max="8000" step="100" 
-               onchange="saveSettings()"
-               style="width: 100px; text-align: center;">
-    </div>
-    <div class="setting-help">
-        Maximum length of response
-    </div>
-</div>
-
-<!-- Frequency Penalty -->
-<div class="setting-group" id="frequencyPenaltyGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <label class="setting-label" style="margin: 0; flex: 1;">Frequency Penalty</label>
-        <input type="number" id="frequencyPenalty" class="setting-input" 
-               value="0" min="0" max="2" step="0.1" 
-               onchange="saveSettings()"
-               style="width: 100px; text-align: center;">
-    </div>
-    <div class="setting-help">
-        Reduces repetition. Higher = less repetition.
-    </div>
-</div>
-
-<!-- Presence Penalty -->
-<div class="setting-group" id="presencePenaltyGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <label class="setting-label" style="margin: 0; flex: 1;">Presence Penalty</label>
-        <input type="number" id="presencePenalty" class="setting-input" 
-               value="0" min="0" max="2" step="0.1" 
-               onchange="saveSettings()"
-               style="width: 100px; text-align: center;">
-    </div>
-    <div class="setting-help">
-        Encourages new topics. Higher = more diverse.
-    </div>
-</div>
-
-<!-- Repetition Penalty -->
-<div class="setting-group" id="repetitionPenaltyGroup">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <label class="setting-label" style="margin: 0; flex: 1;">Repetition Penalty</label>
-        <input type="number" id="repetitionPenalty" class="setting-input" 
-               value="1" min="0.5" max="2" step="0.05" 
-               onchange="saveSettings()"
-               style="width: 100px; text-align: center;">
-    </div>
-    <div class="setting-help">
-        Penalizes repeating tokens. 1 = no penalty.
-    </div>
-</div>
-        </div> <!-- Close ai-panel-content -->
-    </div> <!-- Close settingsView -->
-
-    <!-- Chat View -->
-    <div class="ai-panel-view" id="chatView">
-        <!-- Chat Selector Header -->
-        <div style="padding: 12px 20px; border-bottom: 1px solid var(--border-color); background: white;">
-            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
-                <select id="chatSelector" class="setting-select" onchange="switchChatFromDropdown()" style="flex: 1; padding: 8px; font-size: 13px;">
-                    <option value="">Select a chat...</option>
-                </select>
-                <button class="btn btn-small btn-primary" onclick="createNewChat()" style="padding: 6px 12px; font-size: 13px;">+ New</button>
-                <button class="icon-btn" onclick="showChatActionsMenu(event)" title="Chat actions" style="font-size: 18px;">⋮</button>
-            </div>
-        </div>
-        
-        <!-- Chat Actions Menu (hidden by default) -->
-        <div class="context-menu" id="chatActionsMenu">
-            <div class="context-menu-item" onclick="renameCurrentChat()">✏️ Rename Chat</div>
-            <div class="context-menu-item" onclick="pinCurrentChat()">📌 Toggle Pin</div>
-            <div class="divider"></div>
-            <div class="context-menu-item" onclick="deleteCurrentChat()">🗑️ Delete Chat</div>
-        </div>
-        
-        <div class="chat-messages" id="chatMessages">
-            <div class="chat-empty">
-                <div class="chat-empty-icon">💬</div>
-                <h3>Start a Conversation</h3>
-                <p>Ask questions, brainstorm ideas, or get feedback without affecting your documents</p>
-            </div>
-        </div>
-        
-        <div class="chat-input-area">
-            <div class="chat-context-info" id="chatContextInfo">
-                Context: No materials enabled
-            </div>
-            <div class="chat-input-wrapper">
-                <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
-                <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
-            </div>
-            <div class="chat-actions">
-                <button class="btn btn-small btn-outline" onclick="clearChat()">Clear Messages</button>
-            </div>
-        </div>
-    </div>
-    </div>
-</div>
         </div>
 
 
@@ -2456,7 +2642,9 @@
         font: 'system',
         frequencyPenalty: 0,
         presencePenalty: 0,
-        repetitionPenalty: 1
+        repetitionPenalty: 1,
+        usePromptCaching: false,
+        useExtendedThinking: false
     }
 };
 
@@ -3011,6 +3199,12 @@ let autoSaveTimer = null;
     state.settings.frequencyPenalty = parseFloat(document.getElementById('frequencyPenalty').value);
     state.settings.presencePenalty = parseFloat(document.getElementById('presencePenalty').value);
     state.settings.repetitionPenalty = parseFloat(document.getElementById('repetitionPenalty').value);
+
+    const promptCachingEl = document.getElementById('usePromptCaching');
+    const extendedThinkingEl = document.getElementById('useExtendedThinking');
+    if (promptCachingEl) state.settings.usePromptCaching = promptCachingEl.checked;
+    if (extendedThinkingEl) state.settings.useExtendedThinking = extendedThinkingEl.checked;
+
     saveData();
 }
 
@@ -3948,6 +4142,7 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
             renderMaterials();
             updateEnabledCount();
             updateChatContextInfo();
+            renderChatsListCompact();
         }
 
         function returnToDashboard() {
@@ -4295,16 +4490,25 @@ function updateMaterialTitle() {
         <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                 <div>
-                    <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 5px;" 
-    contenteditable="true" 
+                    <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 5px;"
+    contenteditable="true"
     id="materialTitle"
     onblur="updateMaterialTitle()"
     onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${state.currentMaterial.name}</h1>
-                    <div style="font-size: 13px; color: var(--text-secondary);">Last edited: ${formatDate(state.currentMaterial.modified)}</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                        <div>Last edited: ${formatDate(state.currentMaterial.modified)}</div>
+                        <div id="tokenCount" style="margin-top: 4px;">Ready</div>
+                        <div style="margin-top: 4px; background: var(--primary-light); color: var(--primary-color); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; display: inline-block;">
+                            ⌨️ Ctrl+Enter: Send • Ctrl+Shift+Enter: Continue
+                        </div>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button class="btn btn-secondary btn-small" onclick="sendToAI()" id="sendBtn" disabled title="Send to AI (Ctrl/Cmd + Enter)">
                         🚀 Send to AI
+                    </button>
+                    <button class="btn btn-outline btn-small" onclick="sendToAI(true)" id="sendThinkingBtn" disabled title="Send to AI with Extended Thinking">
+                        🧠 Send with Thinking
                     </button>
                     <button class="btn btn-primary btn-small" onclick="continueWriting()" id="continueBtn" disabled title="Continue Writing (Ctrl/Cmd + Shift + Enter)">
                         ✍️ Continue
@@ -5108,7 +5312,7 @@ const currentContent = editor.getContent({format: 'text'});
             }
         }
 
-        async function sendToAI() {
+        async function sendToAI(useThinking = false) {
             if (!state.settings.apiKey) {
                 alert('Please set your OpenRouter API key in Settings');
                 return;
@@ -5127,8 +5331,10 @@ const currentContent = editor.getContent({format: 'text'});
                 return;
             }
 
-            const btn = document.getElementById('sendBtn');
+            const btn = document.getElementById(useThinking ? 'sendThinkingBtn' : 'sendBtn');
+            const otherBtn = document.getElementById(useThinking ? 'sendBtn' : 'sendThinkingBtn');
             btn.disabled = true;
+            otherBtn.disabled = true;
             btn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
             try {
@@ -5147,15 +5353,23 @@ const currentContent = editor.getContent({format: 'text'});
                 }
                 
                 lastAIRequest = { systemPrompt, context };
-                
-                const response = await callOpenRouter(systemPrompt, context);
+
+                const response = await callOpenRouter(systemPrompt, context, null, { useThinking });
                 showAIResponse(response);
 
             } catch (error) {
                 alert('Error: ' + error.message);
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = '🚀 Send to AI';
+                const sendBtn = document.getElementById('sendBtn');
+                const thinkingBtn = document.getElementById('sendThinkingBtn');
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '🚀 Send to AI';
+                }
+                if (thinkingBtn) {
+                    thinkingBtn.disabled = false;
+                    thinkingBtn.innerHTML = '🧠 Send with Thinking';
+                }
             }
         }
 
@@ -5249,7 +5463,7 @@ const currentContent = editor.getContent({format: 'text'});
             });
         }
 
-        async function callOpenRouter(systemPrompt, userPrompt, agent) {
+        async function callOpenRouter(systemPrompt, userPrompt, agent, options = {}) {
             // If no agent provided, use current agent or manual settings
             if (!agent) {
                 if (state.currentAgent && state.aiAgents[state.currentAgent]) {
@@ -5260,12 +5474,46 @@ const currentContent = editor.getContent({format: 'text'});
                         model: state.settings.model,
                         temperature: state.settings.temperature,
                         topP: state.settings.topP,
-                        maxTokens: state.settings.maxTokens
+                        maxTokens: state.settings.maxTokens,
+                        usePromptCaching: state.settings.usePromptCaching,
+                        useExtendedThinking: state.settings.useExtendedThinking
                     };
                 }
             }
 
+            // Extract options
+            const useThinking = options.useThinking || agent.useExtendedThinking || false;
+            const usePromptCaching = agent.usePromptCaching !== undefined ? agent.usePromptCaching : state.settings.usePromptCaching;
+
             try {
+                // Build messages array
+                const messages = [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ];
+
+                // Add cache control for prompt caching if enabled
+                if (usePromptCaching) {
+                    messages[0].cache_control = { type: 'ephemeral' };
+                }
+
+                // Build request body
+                const requestBody = {
+                    model: agent.model,
+                    messages: messages,
+                    temperature: agent.temperature,
+                    top_p: agent.topP,
+                    max_tokens: agent.maxTokens,
+                    frequency_penalty: state.settings.frequencyPenalty || 0,
+                    presence_penalty: state.settings.presencePenalty || 0,
+                    repetition_penalty: state.settings.repetitionPenalty || 1
+                };
+
+                // Add extended thinking if enabled
+                if (useThinking) {
+                    requestBody.reasoning_effort = 'high';
+                }
+
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -5274,19 +5522,7 @@ const currentContent = editor.getContent({format: 'text'});
                         'HTTP-Referer': window.location.origin,
                         'X-Title': 'AI Writing Hub'
                     },
-                    body: JSON.stringify({
-    model: agent.model,
-    messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-    ],
-    temperature: agent.temperature,
-    top_p: agent.topP,
-    max_tokens: agent.maxTokens,
-    frequency_penalty: state.settings.frequencyPenalty || 0,
-    presence_penalty: state.settings.presencePenalty || 0,
-    repetition_penalty: state.settings.repetitionPenalty || 1
-})
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
@@ -5372,17 +5608,20 @@ const currentContent = editor.getContent({format: 'text'});
             const dot = document.getElementById('statusDot');
             const text = document.getElementById('statusText');
             const sendBtn = document.getElementById('sendBtn');
+            const thinkingBtn = document.getElementById('sendThinkingBtn');
             const continueBtn = document.getElementById('continueBtn');
 
             if (state.settings.apiKey && state.settings.apiKey.startsWith('sk-or-')) {
                 dot.classList.add('connected');
                 text.textContent = 'API Connected ✓';
                 if (sendBtn) sendBtn.disabled = false;
+                if (thinkingBtn) thinkingBtn.disabled = false;
                 if (continueBtn) continueBtn.disabled = false;
             } else {
                 dot.classList.remove('connected');
                 text.textContent = 'API Not Connected';
                 if (sendBtn) sendBtn.disabled = true;
+                if (thinkingBtn) thinkingBtn.disabled = true;
                 if (continueBtn) continueBtn.disabled = true;
             }
         }
@@ -5396,7 +5635,9 @@ const currentContent = editor.getContent({format: 'text'});
     const frequencyPenalty = document.getElementById('frequencyPenalty');
     const presencePenalty = document.getElementById('presencePenalty');
     const repetitionPenalty = document.getElementById('repetitionPenalty');
-    
+    const usePromptCaching = document.getElementById('usePromptCaching');
+    const useExtendedThinking = document.getElementById('useExtendedThinking');
+
     if (apiKeyInput) apiKeyInput.value = state.settings.apiKey || '';
     if (modelSelect) modelSelect.value = state.settings.model;
     if (temperature) temperature.value = state.settings.temperature || 0.7;
@@ -5405,7 +5646,9 @@ const currentContent = editor.getContent({format: 'text'});
     if (frequencyPenalty) frequencyPenalty.value = state.settings.frequencyPenalty || 0;
     if (presencePenalty) presencePenalty.value = state.settings.presencePenalty || 0;
     if (repetitionPenalty) repetitionPenalty.value = state.settings.repetitionPenalty || 1;
-    
+    if (usePromptCaching) usePromptCaching.checked = state.settings.usePromptCaching || false;
+    if (useExtendedThinking) useExtendedThinking.checked = state.settings.useExtendedThinking || false;
+
     updateModelInfo();
     updateApiStatus();
     toggleManualSettings();
@@ -5488,12 +5731,87 @@ function applyFont() {
     }
 }
 
+        // Left Panel Tab Switching
+        function switchLeftPanelTab(tab) {
+            document.querySelectorAll('.left-panel-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.left-panel-content').forEach(v => v.classList.remove('active'));
+
+            const tabButtons = document.querySelectorAll('.left-panel-tab');
+            tabButtons.forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(tab)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            if (tab === 'materials') {
+                document.getElementById('materialsTabContent').classList.add('active');
+            } else if (tab === 'chats') {
+                document.getElementById('chatsTabContent').classList.add('active');
+                updateChatContextInfo();
+                renderChatSelector();
+                renderChatMessages();
+            } else if (tab === 'settings') {
+                document.getElementById('settingsTabContent').classList.add('active');
+            }
+        }
+
+        // Toggle Materials Collapse
+        function toggleMaterialsCollapse() {
+            const content = document.getElementById('materialsCollapsibleContent');
+            const icon = document.getElementById('materialsCollapseIcon');
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                icon.textContent = '▼';
+            } else {
+                content.classList.add('collapsed');
+                icon.textContent = '▶';
+            }
+        }
+
+        // Render Chats List in Compact View
+        function renderChatsListCompact() {
+            const container = document.getElementById('chatsListCompact');
+            if (!container) return;
+
+            const chats = Object.values(state.chats);
+            if (chats.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon" style="font-size: 24px;">💬</div>
+                        <p style="font-size: 12px;">No chats yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort chats by modified date
+            chats.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+
+            container.innerHTML = chats.map(chat => {
+                const messageCount = chat.messages?.length || 0;
+                const isActive = state.currentChatId === chat.id;
+                return `
+                    <div class="chat-item-compact ${isActive ? 'active' : ''}" onclick="openChatFromList('${chat.id}')">
+                        <div class="chat-item-name">${chat.name}</div>
+                        <div class="chat-item-meta">${messageCount} messages</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Open chat from compact list
+        function openChatFromList(chatId) {
+            state.currentChatId = chatId;
+            switchLeftPanelTab('chats');
+            renderChatsListCompact();
+        }
+
         function switchAITab(tab) {
     document.querySelectorAll('.ai-panel-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.ai-panel-view').forEach(v => v.classList.remove('active'));
-    
+
     event.target.classList.add('active');
-    
+
     if (tab === 'settings') {
         document.getElementById('settingsView').classList.add('active');
     } else if (tab === 'chat') {
@@ -5657,15 +5975,18 @@ async function sendChatMessage() {
         if (state.currentAgent && state.aiAgents[state.currentAgent]) {
             const agent = state.aiAgents[state.currentAgent];
             systemPrompt = agent.systemPrompt || systemPrompt;
-            
+
             // Get active configuration
             const activeConfig = agent.configurations?.find(c => c.id === agent.activeConfigId) || agent.configurations?.[0];
             if (activeConfig) {
                 agentConfig = activeConfig;
             }
         }
-        
-        const response = await callOpenRouter(systemPrompt, fullMessage, agentConfig);
+
+        // Check if thinking is enabled
+        const useThinking = document.getElementById('chatUseThinking')?.checked || false;
+
+        const response = await callOpenRouter(systemPrompt, fullMessage, agentConfig, { useThinking });
         
         currentChat.messages.push({
             role: 'assistant',
@@ -5676,6 +5997,7 @@ async function sendChatMessage() {
         saveData();
         renderChatMessages();
         renderChatSelector();
+        renderChatsListCompact();
         
     } catch (error) {
         alert('Error: ' + error.message);
@@ -5826,7 +6148,7 @@ function sendMessageToDraft(messageIndex) {
 // Chat Management Functions
 function createNewChat() {
     const chatName = prompt('Name this chat (optional):') || 'Untitled Chat';
-    
+
     const chatId = 'chat_' + Date.now();
     state.chats[chatId] = {
         id: chatId,
@@ -5838,11 +6160,12 @@ function createNewChat() {
         pinned: false,
         archived: false
     };
-    
+
     state.currentChatId = chatId;
     saveData();
     renderChatSelector();
     renderChatMessages();
+    renderChatsListCompact();
 }
 
 function switchChat(chatId) {
@@ -5898,16 +6221,17 @@ function showChatActionsMenu(event) {
 function renameCurrentChat() {
     document.getElementById('chatActionsMenu').style.display = 'none';
     if (!state.currentChatId) return;
-    
+
     const chat = state.chats[state.currentChatId];
     if (!chat) return;
-    
+
     const newName = prompt('Rename chat:', chat.name);
     if (newName && newName.trim()) {
         chat.name = newName.trim();
         chat.modified = new Date().toISOString();
         saveData();
         renderChatSelector();
+        renderChatsListCompact();
     }
 }
 
@@ -5927,14 +6251,14 @@ function pinCurrentChat() {
 function deleteCurrentChat() {
     document.getElementById('chatActionsMenu').style.display = 'none';
     if (!state.currentChatId) return;
-    
+
     const chat = state.chats[state.currentChatId];
     if (!chat) return;
-    
+
     if (!confirm(`Delete chat "${chat.name}"?`)) return;
-    
+
     delete state.chats[state.currentChatId];
-    
+
     const remainingChats = Object.keys(state.chats).filter(id => !state.chats[id].archived);
     if (remainingChats.length > 0) {
         state.currentChatId = remainingChats[0];
@@ -5946,6 +6270,7 @@ function deleteCurrentChat() {
     saveData();
     renderChatSelector();
     renderChatMessages();
+    renderChatsListCompact();
 }
 
 function copyMessageToClipboard(messageIndex) {
@@ -6007,6 +6332,7 @@ function clearChat() {
         saveData();
         renderChatMessages();
         renderChatSelector();
+        renderChatsListCompact();
     }
 }
 
