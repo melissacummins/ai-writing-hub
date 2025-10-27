@@ -2464,6 +2464,26 @@
     </div>
 </div>
 
+    <!-- Copy to Project Modal -->
+    <div class="modal" id="copyToProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Copy to Project</h2>
+                <p style="color: var(--text-secondary); font-size: 14px;">Select destination project</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Project</label>
+                <select id="destinationProject" class="form-select">
+                    <option value="">Select a project...</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('copyToProjectModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="copyMaterialToProject()">Copy</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Upload File Modal -->
     <div class="modal" id="uploadModal">
         <div class="modal-content">
@@ -2775,6 +2795,7 @@
     <div class="context-menu" id="contextMenu">
         <div class="context-menu-item" onclick="renameMaterial()">Rename</div>
         <div class="context-menu-item" onclick="duplicateMaterial()">Duplicate</div>
+        <div class="context-menu-item" onclick="showCopyToProjectModal()">Copy to Project...</div>
         <div class="divider"></div>
         <div class="context-menu-item" onclick="deleteMaterial()">Delete</div>
     </div>
@@ -3858,7 +3879,7 @@ function renderConfigurationsList() {
 
 function addConfiguration() {
     editingConfigId = null;
-    
+
     document.getElementById('configModalTitle').textContent = 'Add Configuration';
     document.getElementById('configName').value = '';
     document.getElementById('configModel').value = state.availableModels[0]?.id || '';
@@ -3868,27 +3889,36 @@ function addConfiguration() {
     document.getElementById('configFrequencyPenalty').value = '0';
     document.getElementById('configPresencePenalty').value = '0';
     document.getElementById('configRepetitionPenalty').value = '1';
-    
+
     updateConfigRangeDisplay('configTemperature');
     updateConfigRangeDisplay('configTopP');
     updateConfigRangeDisplay('configFrequencyPenalty');
     updateConfigRangeDisplay('configPresencePenalty');
     updateConfigRangeDisplay('configRepetitionPenalty');
-    
+
     // Populate model dropdown
     const modelSelect = document.getElementById('configModel');
     modelSelect.innerHTML = state.availableModels
         .filter(m => !state.modelPreferences.hidden.includes(m.id))
         .map(m => `<option value="${m.id}">${m.name}</option>`)
         .join('');
-    
+
+    // Auto-populate name with the first model's name
+    const firstModel = state.availableModels.find(m => !state.modelPreferences.hidden.includes(m.id));
+    if (firstModel) {
+        document.getElementById('configName').value = firstModel.name;
+    }
+
+    // Set up event listener for model change to auto-populate name
+    setupModelChangeListener();
+
     document.getElementById('configModal').style.display = 'flex';
 }
 
 function editConfiguration(index) {
     editingConfigId = index;
     const config = tempConfigurations[index];
-    
+
     document.getElementById('configModalTitle').textContent = 'Edit Configuration';
     document.getElementById('configName').value = config.name;
     document.getElementById('configModel').value = config.model;
@@ -3898,21 +3928,43 @@ function editConfiguration(index) {
     document.getElementById('configFrequencyPenalty').value = config.frequencyPenalty || 0;
     document.getElementById('configPresencePenalty').value = config.presencePenalty || 0;
     document.getElementById('configRepetitionPenalty').value = config.repetitionPenalty || 1;
-    
+
     updateConfigRangeDisplay('configTemperature');
     updateConfigRangeDisplay('configTopP');
     updateConfigRangeDisplay('configFrequencyPenalty');
     updateConfigRangeDisplay('configPresencePenalty');
     updateConfigRangeDisplay('configRepetitionPenalty');
-    
+
     // Populate model dropdown
     const modelSelect = document.getElementById('configModel');
     modelSelect.innerHTML = state.availableModels
         .filter(m => !state.modelPreferences.hidden.includes(m.id))
         .map(m => `<option value="${m.id}">${m.name}</option>`)
         .join('');
-    
+
+    // Set up event listener for model change to auto-populate name
+    setupModelChangeListener();
+
     document.getElementById('configModal').style.display = 'flex';
+}
+
+function setupModelChangeListener() {
+    const modelSelect = document.getElementById('configModel');
+    const configNameInput = document.getElementById('configName');
+
+    // Remove any existing event listener by cloning the element
+    const newModelSelect = modelSelect.cloneNode(true);
+    modelSelect.parentNode.replaceChild(newModelSelect, modelSelect);
+
+    // Add new event listener
+    newModelSelect.addEventListener('change', function() {
+        const selectedModelId = this.value;
+        const selectedModel = state.availableModels.find(m => m.id === selectedModelId);
+
+        if (selectedModel) {
+            configNameInput.value = selectedModel.name;
+        }
+    });
 }
 
 function deleteConfiguration(index) {
@@ -4576,11 +4628,11 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
 
         function duplicateMaterial() {
             document.getElementById('contextMenu').style.display = 'none';
-            
+
             const materialId = window.contextMaterialId;
             const material = state.materials[materialId];
             if (!material) return;
-            
+
             const id = 'mat_' + Date.now();
             state.materials[id] = {
                 ...material,
@@ -4591,6 +4643,67 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
             };
             saveData();
             renderMaterials();
+        }
+
+        function showCopyToProjectModal() {
+            document.getElementById('contextMenu').style.display = 'none';
+
+            const materialId = window.contextMaterialId;
+            const material = state.materials[materialId];
+            if (!material) return;
+
+            // Populate project dropdown with projects other than the current one
+            const select = document.getElementById('destinationProject');
+            const projects = Object.values(state.projects)
+                .filter(p => p.id !== state.currentProject.id)
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            if (projects.length === 0) {
+                alert('No other projects available. Please create another project first.');
+                return;
+            }
+
+            select.innerHTML = '<option value="">Select a project...</option>' +
+                projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+            document.getElementById('copyToProjectModal').style.display = 'flex';
+        }
+
+        function copyMaterialToProject() {
+            const materialId = window.contextMaterialId;
+            const material = state.materials[materialId];
+            if (!material) {
+                alert('Material not found');
+                return;
+            }
+
+            const destinationProjectId = document.getElementById('destinationProject').value;
+            if (!destinationProjectId) {
+                alert('Please select a destination project');
+                return;
+            }
+
+            const destinationProject = state.projects[destinationProjectId];
+            if (!destinationProject) {
+                alert('Selected project not found');
+                return;
+            }
+
+            // Create a copy in the destination project
+            const id = 'mat_' + Date.now();
+            state.materials[id] = {
+                ...material,
+                id,
+                projectId: destinationProjectId,
+                created: new Date().toISOString(),
+                modified: new Date().toISOString()
+            };
+
+            saveData();
+            closeModal('copyToProjectModal');
+
+            // Show success message
+            alert(`Material "${material.name}" copied to "${destinationProject.name}"`);
         }
 
         function deleteMaterial() {
