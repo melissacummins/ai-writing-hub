@@ -1562,6 +1562,72 @@
             margin-top: 25px;
         }
 
+        /* Notification Toast */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .notification {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+            pointer-events: auto;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .notification.success {
+            border-left-color: var(--secondary-color);
+        }
+
+        .notification.error {
+            border-left-color: var(--error-color);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .notification.hiding {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
         /* File Upload Area */
         .upload-area {
             border: 2px dashed var(--border-color);
@@ -1999,6 +2065,9 @@
     </style>
 </head>
 <body>
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
     <!-- Auth Modal -->
     <div class="auth-modal" id="authModal">
         <div class="auth-content">
@@ -3015,9 +3084,33 @@ let autoSaveTimer = null;
             }
         }
 
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            if (!container) return;
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            container.appendChild(notification);
+
+            // Auto-dismiss after 3 seconds (longer for errors)
+            const dismissTime = type === 'error' ? 5000 : 3000;
+            setTimeout(() => {
+                notification.classList.add('hiding');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300); // Match animation duration
+            }, dismissTime);
+        }
+
         async function saveUserData(immediate = false) {
     if (!currentUser) {
         // No user logged in, nothing to sync to Firebase
+        console.log('ℹ️ Skipping Firebase sync - no user logged in');
         return;
     }
 
@@ -3044,11 +3137,45 @@ let autoSaveTimer = null;
         pendingFirebaseWrite = false;
 
         firebaseWriteInProgress = true;
+
+        // Calculate data size for diagnostics
+        const stateJson = JSON.stringify(state);
+        const sizeInBytes = new Blob([stateJson]).size;
+        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+        const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(2);
+
+        console.log('💾 Starting IMMEDIATE Firebase save...');
+        console.log(`   Data size: ${sizeInKB} KB (${sizeInMB} MB)`);
+        console.log(`   Materials count: ${Object.keys(state.materials || {}).length}`);
+        console.log(`   Current material: ${state.currentMaterial?.name || 'none'}`);
+
+        if (sizeInBytes > 1024 * 1024) {
+            console.error('❌ DATA TOO LARGE! Firestore has a 1MB document limit.');
+            console.error(`   Your data is ${sizeInMB} MB which exceeds the limit.`);
+            showNotification('⚠️ Save failed: Data exceeds 1MB limit. Consider splitting materials into smaller pieces.', 'error');
+            firebaseWriteInProgress = false;
+            return;
+        }
+
         try {
             await db.collection('users').doc(currentUser.uid).set(state);
             console.log('✅ Immediate Firebase sync complete at', new Date().toLocaleTimeString());
+            showNotification('💾 Saved successfully', 'success');
         } catch (error) {
-            console.error('Error saving user data:', error);
+            console.error('❌ ERROR saving user data (immediate):', error);
+            console.error('   Error code:', error.code);
+            console.error('   Error message:', error.message);
+            console.error('   Full error:', error);
+
+            let errorMsg = 'Failed to save to cloud';
+            if (error.code === 'resource-exhausted') {
+                errorMsg = 'Data too large for Firestore (1MB limit exceeded)';
+            } else if (error.code === 'permission-denied') {
+                errorMsg = 'Permission denied - check Firebase rules';
+            } else if (error.message) {
+                errorMsg = error.message;
+            }
+            showNotification(`⚠️ ${errorMsg}`, 'error');
         } finally {
             firebaseWriteInProgress = false;
 
@@ -3059,11 +3186,32 @@ let autoSaveTimer = null;
                 if (!firebaseSaveTimer) {
                     firebaseSaveTimer = setTimeout(async () => {
                         firebaseWriteInProgress = true;
+
+                        const stateJson = JSON.stringify(state);
+                        const sizeInBytes = new Blob([stateJson]).size;
+                        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+                        const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(2);
+
+                        console.log('💾 Starting FOLLOW-UP Firebase save...');
+                        console.log(`   Data size: ${sizeInKB} KB (${sizeInMB} MB)`);
+
+                        if (sizeInBytes > 1024 * 1024) {
+                            console.error('❌ DATA TOO LARGE! Firestore has a 1MB document limit.');
+                            console.error(`   Your data is ${sizeInMB} MB which exceeds the limit.`);
+                            showNotification('⚠️ Save failed: Data exceeds 1MB limit', 'error');
+                            firebaseWriteInProgress = false;
+                            firebaseSaveTimer = null;
+                            return;
+                        }
+
                         try {
                             await db.collection('users').doc(currentUser.uid).set(state);
                             console.log('✅ Follow-up Firebase sync complete at', new Date().toLocaleTimeString());
                         } catch (error) {
-                            console.error('Error saving user data:', error);
+                            console.error('❌ ERROR saving user data (follow-up):', error);
+                            console.error('   Error code:', error.code);
+                            console.error('   Error message:', error.message);
+                            showNotification('⚠️ Failed to save to cloud', 'error');
                         } finally {
                             firebaseWriteInProgress = false;
                             firebaseSaveTimer = null;
@@ -3081,17 +3229,54 @@ let autoSaveTimer = null;
         clearTimeout(firebaseSaveTimer);
     }
 
+    console.log('⏳ Firebase save scheduled (2 second debounce)...');
+
     // Wait 2 seconds before actually saving to Firebase (balanced between speed and rate limiting)
     firebaseSaveTimer = setTimeout(async () => {
         // Clear pending flag before starting write
         pendingFirebaseWrite = false;
 
         firebaseWriteInProgress = true;
+
+        // Calculate data size for diagnostics
+        const stateJson = JSON.stringify(state);
+        const sizeInBytes = new Blob([stateJson]).size;
+        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+        const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(2);
+
+        console.log('💾 Starting DEBOUNCED Firebase save...');
+        console.log(`   Data size: ${sizeInKB} KB (${sizeInMB} MB)`);
+        console.log(`   Materials count: ${Object.keys(state.materials || {}).length}`);
+        console.log(`   Current material: ${state.currentMaterial?.name || 'none'}`);
+
+        if (sizeInBytes > 1024 * 1024) {
+            console.error('❌ DATA TOO LARGE! Firestore has a 1MB document limit.');
+            console.error(`   Your data is ${sizeInMB} MB which exceeds the limit.`);
+            showNotification('⚠️ Save failed: Data exceeds 1MB limit. Consider splitting materials.', 'error');
+            firebaseWriteInProgress = false;
+            firebaseSaveTimer = null;
+            return;
+        }
+
         try {
             await db.collection('users').doc(currentUser.uid).set(state);
             console.log('✅ Firebase sync complete at', new Date().toLocaleTimeString());
+            showNotification('💾 Saved', 'success');
         } catch (error) {
-            console.error('Error saving user data:', error);
+            console.error('❌ ERROR saving user data (debounced):', error);
+            console.error('   Error code:', error.code);
+            console.error('   Error message:', error.message);
+            console.error('   Full error:', error);
+
+            let errorMsg = 'Failed to save to cloud';
+            if (error.code === 'resource-exhausted') {
+                errorMsg = 'Data too large for Firestore (1MB limit exceeded)';
+            } else if (error.code === 'permission-denied') {
+                errorMsg = 'Permission denied - check Firebase rules';
+            } else if (error.message) {
+                errorMsg = error.message;
+            }
+            showNotification(`⚠️ ${errorMsg}`, 'error');
         } finally {
             firebaseWriteInProgress = false;
             firebaseSaveTimer = null;
