@@ -3175,15 +3175,34 @@ let autoSaveTimer = null;
 
                 const materialRef = storageRef.child(path);
 
+                // First, check if the file exists by trying to get metadata
+                console.log('📦 Checking if file exists...');
+                try {
+                    await materialRef.getMetadata();
+                    console.log('✅ File exists in Storage');
+                } catch (metadataError) {
+                    if (metadataError.code === 'storage/object-not-found') {
+                        console.error('❌ File does not exist in Storage');
+                        console.error('   💡 The material may not have been uploaded successfully');
+                        showNotification('⚠️ Material not found in cloud storage', 'error');
+                        return null;
+                    }
+                    // If it's another error, continue trying to load
+                    console.warn('⚠️ Could not verify file existence, attempting to load anyway...');
+                }
+
                 console.log('📦 Getting download URL...');
                 const url = await materialRef.getDownloadURL();
                 console.log(`📦 Download URL obtained: ${url.substring(0, 50)}...`);
 
                 console.log('📦 Fetching content...');
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const content = await response.text();
@@ -3193,6 +3212,7 @@ let autoSaveTimer = null;
                 console.error('❌ ERROR loading material from Storage:', error);
                 console.error('   Error code:', error.code);
                 console.error('   Error message:', error.message);
+                console.error('   Error name:', error.name);
                 console.error('   Material ID:', materialId);
                 console.error('   User ID:', currentUser.uid);
                 console.error('   Full error:', error);
@@ -3204,6 +3224,10 @@ let autoSaveTimer = null;
                 } else if (error.code === 'storage/unauthorized') {
                     errorMsg = 'Permission denied - check Firebase Storage rules';
                     console.error('   💡 Storage security rules may be blocking access');
+                } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMsg = 'Network error loading material (CORS or connectivity issue)';
+                    console.error('   💡 This may be a CORS configuration issue with Firebase Storage');
+                    console.error('   💡 Or a network connectivity problem');
                 } else if (error.message) {
                     errorMsg = error.message;
                 }
@@ -5185,6 +5209,27 @@ function updateMaterialTitle() {
                     } catch (error) {
                         console.error('Error parsing material content from Storage:', error);
                         showNotification('⚠️ Error loading material content', 'error');
+                    }
+                } else {
+                    // Storage load failed - clear the flag and warn user
+                    console.warn(`⚠️ Failed to load from Storage, clearing storageRef flag for material "${material.name}"`);
+                    material.storageRef = false;
+
+                    // If material has no content, provide empty content so it's still editable
+                    if (!material.contentHtml && !material.content) {
+                        console.log(`ℹ️ Material has no content, starting with empty content`);
+                        material.contentHtml = '';
+                        material.content = '';
+                        showNotification(`⚠️ Material content could not be loaded from cloud. Starting with empty content.`, 'warning');
+                    } else {
+                        console.log(`ℹ️ Using existing content from material object`);
+                        showNotification(`⚠️ Using cached content (cloud version unavailable)`, 'warning');
+                    }
+
+                    // Save the updated material state
+                    saveData();
+                    if (currentUser) {
+                        saveUserData(false);
                     }
                 }
             }
