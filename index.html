@@ -3115,21 +3115,47 @@ let autoSaveTimer = null;
         async function saveMaterialToStorage(materialId, content) {
             if (!currentUser || !storage) {
                 console.error('Cannot save to Storage: no user or storage not initialized');
+                console.error('  currentUser:', currentUser ? 'exists' : 'null');
+                console.error('  storage:', storage ? 'exists' : 'null');
                 return null;
             }
 
             try {
                 const storageRef = storage.ref();
-                const materialRef = storageRef.child(`materials/${currentUser.uid}/${materialId}.json`);
+                const path = `materials/${currentUser.uid}/${materialId}.json`;
+                console.log(`📦 Saving to Storage path: ${path}`);
+
+                const materialRef = storageRef.child(path);
 
                 const blob = new Blob([content], { type: 'application/json' });
-                await materialRef.put(blob);
+                console.log(`📦 Uploading ${(blob.size / 1024).toFixed(2)} KB...`);
 
-                console.log(`📦 Saved material ${materialId} to Storage (${(blob.size / 1024).toFixed(2)} KB)`);
+                const uploadTask = await materialRef.put(blob);
+                console.log(`✅ Upload complete! Full path: ${uploadTask.ref.fullPath}`);
+                console.log(`   Size: ${(uploadTask.metadata.size / 1024).toFixed(2)} KB`);
+
+                // Verify we can get the download URL immediately
+                const testUrl = await materialRef.getDownloadURL();
+                console.log(`✅ Download URL verified: ${testUrl.substring(0, 50)}...`);
+
                 return true;
             } catch (error) {
-                console.error('Error saving material to Storage:', error);
-                showNotification('⚠️ Failed to save large material to cloud storage', 'error');
+                console.error('❌ ERROR saving material to Storage:', error);
+                console.error('   Error code:', error.code);
+                console.error('   Error message:', error.message);
+                console.error('   Material ID:', materialId);
+                console.error('   Content size:', content.length, 'bytes');
+                console.error('   Full error:', error);
+
+                let errorMsg = 'Failed to save large material to cloud storage';
+                if (error.code === 'storage/unauthorized') {
+                    errorMsg = 'Permission denied - check Firebase Storage rules';
+                    console.error('   💡 Storage security rules may be blocking writes');
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+
+                showNotification(`⚠️ ${errorMsg}`, 'error');
                 return false;
             }
         }
@@ -3137,22 +3163,52 @@ let autoSaveTimer = null;
         async function loadMaterialFromStorage(materialId) {
             if (!currentUser || !storage) {
                 console.error('Cannot load from Storage: no user or storage not initialized');
+                console.error('  currentUser:', currentUser ? 'exists' : 'null');
+                console.error('  storage:', storage ? 'exists' : 'null');
                 return null;
             }
 
             try {
                 const storageRef = storage.ref();
-                const materialRef = storageRef.child(`materials/${currentUser.uid}/${materialId}.json`);
+                const path = `materials/${currentUser.uid}/${materialId}.json`;
+                console.log(`📦 Attempting to load from Storage path: ${path}`);
 
+                const materialRef = storageRef.child(path);
+
+                console.log('📦 Getting download URL...');
                 const url = await materialRef.getDownloadURL();
-                const response = await fetch(url);
-                const content = await response.text();
+                console.log(`📦 Download URL obtained: ${url.substring(0, 50)}...`);
 
-                console.log(`📦 Loaded material ${materialId} from Storage`);
+                console.log('📦 Fetching content...');
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const content = await response.text();
+                console.log(`✅ Loaded material ${materialId} from Storage (${(content.length / 1024).toFixed(2)} KB)`);
                 return content;
             } catch (error) {
-                console.error('Error loading material from Storage:', error);
-                showNotification('⚠️ Failed to load material from cloud storage', 'error');
+                console.error('❌ ERROR loading material from Storage:', error);
+                console.error('   Error code:', error.code);
+                console.error('   Error message:', error.message);
+                console.error('   Material ID:', materialId);
+                console.error('   User ID:', currentUser.uid);
+                console.error('   Full error:', error);
+
+                let errorMsg = 'Failed to load material from cloud storage';
+                if (error.code === 'storage/object-not-found') {
+                    errorMsg = 'Material not found in cloud storage';
+                    console.error('   💡 The file may not have been saved correctly');
+                } else if (error.code === 'storage/unauthorized') {
+                    errorMsg = 'Permission denied - check Firebase Storage rules';
+                    console.error('   💡 Storage security rules may be blocking access');
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+
+                showNotification(`⚠️ ${errorMsg}`, 'error');
                 return null;
             }
         }
