@@ -6450,11 +6450,12 @@ const currentContent = editor.getContent({format: 'text'});
         function updateTokenCount() {
     const editor = tinymce.get('tinymceEditor');
     if (!editor) return;
-    
+
     const text = editor.getContent({format: 'text'});
     const tokens = Math.ceil(text.length / 4);
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     const el = document.getElementById('tokenCount');
-    if (el) el.textContent = `${tokens} tokens • ${text.length} chars`;
+    if (el) el.textContent = `${tokens} tokens • ${words} words • ${text.length} chars`;
 }
 
         function formatDate(dateString) {
