@@ -5836,6 +5836,7 @@ const htmlContent = editor ? editor.getContent() : material.contentHtml || mater
 
         saveData();
         renderMaterials();
+        uploadArea.innerHTML = originalHTML;
         closeModal('uploadModal');
         selectMaterial(id);
 
