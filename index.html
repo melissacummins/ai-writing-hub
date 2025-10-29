@@ -5371,6 +5371,7 @@ function updateMaterialTitle() {
                 font-size: 16px;
                 line-height: 1.8;
                 padding: 20px;
+                overflow-y: scroll;
             }
 
             /* Custom scrollbar styling */
@@ -6044,7 +6045,7 @@ async function parseWord(file) {
                 return;
             }
 
-            if (!state.currentMaterial || !quillEditor) {
+            if (!state.currentMaterial) {
                 alert('Please select a material to continue writing');
                 return;
             }
