@@ -4793,6 +4793,14 @@ function manageConfigurations() {
             state.currentProject = project;
             project.lastOpened = new Date().toISOString();
 
+            // Clear current chat if it doesn't belong to this project
+            if (state.currentChatId) {
+                const currentChat = state.chats[state.currentChatId];
+                if (!currentChat || currentChat.projectId !== projectId) {
+                    state.currentChatId = null;
+                }
+            }
+
             state.recentProjects = state.recentProjects.filter(id => id !== projectId);
             state.recentProjects.unshift(projectId);
             state.recentProjects = state.recentProjects.slice(0, 10);
@@ -6552,7 +6560,10 @@ function applyFont() {
             const container = document.getElementById('chatsListCompact');
             if (!container) return;
 
-            const chats = Object.values(state.chats);
+            // Filter chats by current project
+            const chats = Object.values(state.chats)
+                .filter(chat => chat.projectId === state.currentProject?.id);
+
             if (chats.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -6854,13 +6865,14 @@ function pinChat(chatId) {
 function archiveChat(chatId) {
     const chat = state.chats[chatId];
     if (!chat) return;
-    
+
     chat.archived = !chat.archived;
     chat.modified = new Date().toISOString();
-    
-    // If archiving current chat, switch to another
+
+    // If archiving current chat, switch to another in the same project
     if (state.currentChatId === chatId && chat.archived) {
-        const activeChats = Object.values(state.chats).filter(c => !c.archived);
+        const activeChats = Object.values(state.chats)
+            .filter(c => !c.archived && c.projectId === state.currentProject?.id);
         if (activeChats.length > 0) {
             state.currentChatId = activeChats[0].id;
         } else {
@@ -6965,9 +6977,9 @@ function switchChatFromDropdown() {
 function renderChatSelector() {
     const selector = document.getElementById('chatSelector');
     if (!selector) return;
-    
+
     const chats = Object.values(state.chats)
-        .filter(chat => !chat.archived)
+        .filter(chat => !chat.archived && chat.projectId === state.currentProject?.id)
         .sort((a, b) => {
             if (a.pinned && !b.pinned) return -1;
             if (!a.pinned && b.pinned) return 1;
