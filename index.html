@@ -2702,61 +2702,75 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Temperature</label>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 11px; color: var(--text-secondary);">Focused</span>
-                    <span class="range-value" id="configTemperatureValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0.7</span>
-                    <span style="font-size: 11px; color: var(--text-secondary);">Creative</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                    <label class="form-label" style="margin: 0; flex: 1;">Temperature</label>
+                    <input type="number" id="configTemperature" class="form-input"
+                           value="0.7" min="0" max="2" step="0.1"
+                           style="width: 80px; text-align: center;">
                 </div>
-                <input type="range" id="configTemperature" class="setting-range" 
-                       min="0" max="1" step="0.05" value="0.7" 
-                       oninput="updateConfigRangeDisplay('configTemperature')" style="width: 100%;">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    Controls creativity (0 = deterministic, 2 = very creative)
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Top P</label>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span class="range-value" id="configTopPValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0.9</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                    <label class="form-label" style="margin: 0; flex: 1;">Top P</label>
+                    <input type="number" id="configTopP" class="form-input"
+                           value="0.9" min="0" max="1" step="0.05"
+                           style="width: 80px; text-align: center;">
                 </div>
-                <input type="range" id="configTopP" class="setting-range" 
-                       min="0" max="1" step="0.05" value="0.9" 
-                       oninput="updateConfigRangeDisplay('configTopP')" style="width: 100%;">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    Controls randomness (0 to 1)
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Max Tokens</label>
-                <input type="number" id="configMaxTokens" class="form-input" 
-                       value="2000" min="100" max="8000">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                    <label class="form-label" style="margin: 0; flex: 1;">Max Tokens</label>
+                    <input type="number" id="configMaxTokens" class="form-input"
+                           value="2000" min="100" max="8000" step="100"
+                           style="width: 80px; text-align: center;">
+                </div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    Maximum length of response
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Frequency Penalty</label>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span class="range-value" id="configFrequencyPenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                    <label class="form-label" style="margin: 0; flex: 1;">Frequency Penalty</label>
+                    <input type="number" id="configFrequencyPenalty" class="form-input"
+                           value="0" min="0" max="2" step="0.1"
+                           style="width: 80px; text-align: center;">
                 </div>
-                <input type="range" id="configFrequencyPenalty" class="setting-range" 
-                       min="0" max="1" step="0.05" value="0" 
-                       oninput="updateConfigRangeDisplay('configFrequencyPenalty')" style="width: 100%;">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    Reduces repetition. Higher = less repetition.
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Presence Penalty</label>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span class="range-value" id="configPresencePenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">0</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                    <label class="form-label" style="margin: 0; flex: 1;">Presence Penalty</label>
+                    <input type="number" id="configPresencePenalty" class="form-input"
+                           value="0" min="0" max="2" step="0.1"
+                           style="width: 80px; text-align: center;">
                 </div>
-                <input type="range" id="configPresencePenalty" class="setting-range" 
-                       min="0" max="1" step="0.05" value="0" 
-                       oninput="updateConfigRangeDisplay('configPresencePenalty')" style="width: 100%;">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    Encourages new topics. Higher = more diverse.
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Repetition Penalty</label>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span class="range-value" id="configRepetitionPenaltyValue" style="margin: 0; font-size: 14px; font-weight: 600; color: var(--primary-color);">1</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                    <label class="form-label" style="margin: 0; flex: 1;">Repetition Penalty</label>
+                    <input type="number" id="configRepetitionPenalty" class="form-input"
+                           value="1" min="0.5" max="2" step="0.05"
+                           style="width: 80px; text-align: center;">
                 </div>
-                <input type="range" id="configRepetitionPenalty" class="setting-range" 
-                       min="0.5" max="1.5" step="0.05" value="1" 
-                       oninput="updateConfigRangeDisplay('configRepetitionPenalty')" style="width: 100%;">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    Penalizes repeating tokens. 1 = no penalty.
+                </div>
             </div>
 
             <div class="modal-actions">
@@ -4273,12 +4287,6 @@ function addConfiguration() {
     document.getElementById('configPresencePenalty').value = '0';
     document.getElementById('configRepetitionPenalty').value = '1';
 
-    updateConfigRangeDisplay('configTemperature');
-    updateConfigRangeDisplay('configTopP');
-    updateConfigRangeDisplay('configFrequencyPenalty');
-    updateConfigRangeDisplay('configPresencePenalty');
-    updateConfigRangeDisplay('configRepetitionPenalty');
-
     // Populate model dropdown
     const modelSelect = document.getElementById('configModel');
     modelSelect.innerHTML = state.availableModels
@@ -4311,12 +4319,6 @@ function editConfiguration(index) {
     document.getElementById('configFrequencyPenalty').value = config.frequencyPenalty || 0;
     document.getElementById('configPresencePenalty').value = config.presencePenalty || 0;
     document.getElementById('configRepetitionPenalty').value = config.repetitionPenalty || 1;
-
-    updateConfigRangeDisplay('configTemperature');
-    updateConfigRangeDisplay('configTopP');
-    updateConfigRangeDisplay('configFrequencyPenalty');
-    updateConfigRangeDisplay('configPresencePenalty');
-    updateConfigRangeDisplay('configRepetitionPenalty');
 
     // Populate model dropdown
     const modelSelect = document.getElementById('configModel');
@@ -4445,11 +4447,6 @@ function updateAgentRangeDisplay(id) {
     if (element && displayElement) {
         displayElement.textContent = element.value;
     }
-}
-
-function updateConfigRangeDisplay(id) {
-    const value = document.getElementById(id).value;
-    document.getElementById(id + 'Value').textContent = value;
 }
 
 function manageConfigurations() {
@@ -4792,6 +4789,14 @@ function manageConfigurations() {
 
             state.currentProject = project;
             project.lastOpened = new Date().toISOString();
+
+            // Clear current chat if it doesn't belong to this project
+            if (state.currentChatId) {
+                const currentChat = state.chats[state.currentChatId];
+                if (!currentChat || currentChat.projectId !== projectId) {
+                    state.currentChatId = null;
+                }
+            }
 
             state.recentProjects = state.recentProjects.filter(id => id !== projectId);
             state.recentProjects.unshift(projectId);
@@ -6552,7 +6557,10 @@ function applyFont() {
             const container = document.getElementById('chatsListCompact');
             if (!container) return;
 
-            const chats = Object.values(state.chats);
+            // Filter chats by current project
+            const chats = Object.values(state.chats)
+                .filter(chat => chat.projectId === state.currentProject?.id);
+
             if (chats.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -6854,13 +6862,14 @@ function pinChat(chatId) {
 function archiveChat(chatId) {
     const chat = state.chats[chatId];
     if (!chat) return;
-    
+
     chat.archived = !chat.archived;
     chat.modified = new Date().toISOString();
-    
-    // If archiving current chat, switch to another
+
+    // If archiving current chat, switch to another in the same project
     if (state.currentChatId === chatId && chat.archived) {
-        const activeChats = Object.values(state.chats).filter(c => !c.archived);
+        const activeChats = Object.values(state.chats)
+            .filter(c => !c.archived && c.projectId === state.currentProject?.id);
         if (activeChats.length > 0) {
             state.currentChatId = activeChats[0].id;
         } else {
@@ -6965,9 +6974,9 @@ function switchChatFromDropdown() {
 function renderChatSelector() {
     const selector = document.getElementById('chatSelector');
     if (!selector) return;
-    
+
     const chats = Object.values(state.chats)
-        .filter(chat => !chat.archived)
+        .filter(chat => !chat.archived && chat.projectId === state.currentProject?.id)
         .sort((a, b) => {
             if (a.pinned && !b.pinned) return -1;
             if (!a.pinned && b.pinned) return 1;
