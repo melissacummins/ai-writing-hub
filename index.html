@@ -5386,6 +5386,11 @@ function updateMaterialTitle() {
             'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
             'bullist numlist | removeformat | code fullscreen',
         content_style: `
+            html {
+                overflow-y: scroll;
+                scrollbar-gutter: stable;
+            }
+
             body {
                 font-family: ${getFontFamily(state.settings.font)};
                 font-size: 16px;
