@@ -4021,16 +4021,19 @@ let autoSaveTimer = null;
         function populateAgentSelector() {
     const select = document.getElementById('agentSelect');
     if (!select) return;
-    
+
     select.innerHTML = '<option value="">Manual Settings</option>';
-    
-    Object.values(state.aiAgents).forEach(agent => {
-        const option = document.createElement('option');
-        option.value = agent.id;
-        option.textContent = agent.name;
-        select.appendChild(option);
-    });
-    
+
+    // Filter agents by current project
+    Object.values(state.aiAgents)
+        .filter(agent => agent.projectId === state.currentProject?.id)
+        .forEach(agent => {
+            const option = document.createElement('option');
+            option.value = agent.id;
+            option.textContent = agent.name;
+            select.appendChild(option);
+        });
+
     select.value = state.currentAgent || '';
     updateAgentUI();
 }
@@ -4138,8 +4141,10 @@ function updateAgentInfo() {
 
         function renderAgentsList() {
             const container = document.getElementById('agentsList');
-            const agents = Object.values(state.aiAgents);
-            
+            // Filter agents by current project
+            const agents = Object.values(state.aiAgents)
+                .filter(agent => agent.projectId === state.currentProject?.id);
+
             if (agents.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -4423,7 +4428,8 @@ function saveAgent() {
             description,
             systemPrompt,
             configurations: tempConfigurations,
-            activeConfigId: tempConfigurations[0].id
+            activeConfigId: tempConfigurations[0].id,
+            projectId: state.currentProject.id
         };
     }
     
@@ -4798,6 +4804,14 @@ function manageConfigurations() {
                 }
             }
 
+            // Clear current agent if it doesn't belong to this project
+            if (state.currentAgent) {
+                const currentAgent = state.aiAgents[state.currentAgent];
+                if (!currentAgent || currentAgent.projectId !== projectId) {
+                    state.currentAgent = null;
+                }
+            }
+
             state.recentProjects = state.recentProjects.filter(id => id !== projectId);
             state.recentProjects.unshift(projectId);
             state.recentProjects = state.recentProjects.slice(0, 10);
@@ -4818,6 +4832,7 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
             updateEnabledCount();
             updateChatContextInfo();
             renderChatsListCompact();
+            populateAgentSelector();
         }
 
         function returnToDashboard() {
