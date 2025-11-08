@@ -911,28 +911,8 @@
     padding: 20px;
 }
 
-/* Force visible scrollbar in TinyMCE iframe */
-.tox .tox-edit-area iframe {
-    overflow-y: scroll !important;
-}
-
-/* Custom scrollbar styling for TinyMCE iframe */
-.tox .tox-edit-area__iframe::-webkit-scrollbar {
-    width: 12px;
-}
-
-.tox .tox-edit-area__iframe::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.tox .tox-edit-area__iframe::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 6px;
-}
-
-.tox .tox-edit-area__iframe::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
+/* TinyMCE iframe should not have its own scrollbar */
+/* Scrolling is handled by the body element inside the iframe */
 
 .tox .tox-toolbar {
     background: white !important;
@@ -2191,27 +2171,6 @@
                                 <div class="empty-state">
                                     <div class="empty-icon" style="font-size: 24px;">📄</div>
                                     <p style="font-size: 12px;">No materials yet</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chats Section -->
-                    <div class="collapsible-section">
-                        <div class="collapsible-header">
-                            <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Chats</span>
-                        </div>
-                        <div class="collapsible-content">
-                            <div style="padding: 10px 15px;">
-                                <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px; font-size: 12px; padding: 8px;" onclick="createNewChat(); switchLeftPanelTab('chats')">
-                                    + New Chat
-                                </button>
-                            </div>
-
-                            <div class="chats-list-compact" id="chatsListCompact">
-                                <div class="empty-state">
-                                    <div class="empty-icon" style="font-size: 24px;">💬</div>
-                                    <p style="font-size: 12px;">No chats yet</p>
                                 </div>
                             </div>
                         </div>
@@ -5386,34 +5345,30 @@ function updateMaterialTitle() {
             'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
             'bullist numlist | removeformat | code fullscreen',
         content_style: `
-            html {
-                overflow-y: scroll;
-                scrollbar-gutter: stable;
-            }
-
             body {
                 font-family: ${getFontFamily(state.settings.font)};
                 font-size: 16px;
                 line-height: 1.8;
                 padding: 20px;
                 overflow-y: scroll;
+                min-height: 100vh;
             }
 
-            /* Custom scrollbar styling */
-            ::-webkit-scrollbar {
+            /* Custom scrollbar styling - always visible */
+            body::-webkit-scrollbar {
                 width: 12px;
             }
 
-            ::-webkit-scrollbar-track {
+            body::-webkit-scrollbar-track {
                 background: #f1f1f1;
             }
 
-            ::-webkit-scrollbar-thumb {
+            body::-webkit-scrollbar-thumb {
                 background: #888;
                 border-radius: 6px;
             }
 
-            ::-webkit-scrollbar-thumb:hover {
+            body::-webkit-scrollbar-thumb:hover {
                 background: #555;
             }
         `,
