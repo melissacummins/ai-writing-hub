@@ -2079,7 +2079,7 @@
                 <span id="statusText">API Not Connected</span>
             </div>
             <button class="btn btn-outline" onclick="showSettings()">⚙️ Settings</button>
-            <button class="btn btn-outline" onclick="showAgentManager()">🤖 AI Agents</button>
+            <button class="btn btn-outline" onclick="showAgentManager()">🤖 AI Settings</button>
             <button class="btn btn-outline" onclick="showPromptLibrary()">📚 Prompts</button>
             <div id="userProfileContainer"></div>
         </div>
@@ -2145,34 +2145,31 @@
 
                 <!-- Materials Tab Content -->
                 <div class="left-panel-content active" id="materialsTabContent">
-                    <!-- Collapsible Materials Section -->
-                    <div class="collapsible-section">
-                        <div class="collapsible-header" onclick="toggleMaterialsCollapse()">
-                            <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Materials</span>
-                            <span id="materialsCollapseIcon">▼</span>
+                    <div style="padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px; font-size: 12px; padding: 8px;" onclick="showAddMaterialModal()">
+                            + Add Material
+                        </button>
+                        <button class="btn btn-outline" style="width: 100%; margin-bottom: 10px; font-size: 12px; padding: 8px;" onclick="showUploadModal()">
+                            📤 Upload File
+                        </button>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span id="enabledCount" style="display: inline-block; background: var(--secondary-color); color: white; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">
+                                ✓ 0 materials enabled
+                            </span>
+
+                            <select id="materialsSortOrder" class="setting-select" onchange="changeMaterialsSorting()" style="font-size: 11px; padding: 4px 8px;">
+                                <option value="modified">Last Edited</option>
+                                <option value="created">Recently Added</option>
+                                <option value="alphabetical">Alphabetical</option>
+                            </select>
                         </div>
-                        <div class="collapsible-content" id="materialsCollapsibleContent">
-                            <div style="padding: 10px 15px;">
-                                <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px; font-size: 12px; padding: 8px;" onclick="showAddMaterialModal()">
-                                    + Add Material
-                                </button>
-                                <button class="btn btn-outline" style="width: 100%; margin-bottom: 10px; font-size: 12px; padding: 8px;" onclick="showUploadModal()">
-                                    📤 Upload File
-                                </button>
+                    </div>
 
-                                <div style="text-align: center; margin-bottom: 10px;">
-                                    <span id="enabledCount" style="display: inline-block; background: var(--secondary-color); color: white; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">
-                                        ✓ 0 materials enabled
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="materials-list-compact" id="materialsList">
-                                <div class="empty-state">
-                                    <div class="empty-icon" style="font-size: 24px;">📄</div>
-                                    <p style="font-size: 12px;">No materials yet</p>
-                                </div>
-                            </div>
+                    <div class="materials-list" id="materialsList">
+                        <div class="empty-state">
+                            <div class="empty-icon" style="font-size: 24px;">📄</div>
+                            <p style="font-size: 12px;">No materials yet</p>
                         </div>
                     </div>
                 </div>
@@ -2229,7 +2226,7 @@
                     <div class="ai-panel-content" style="padding: 15px;">
                         <!-- Agent Selector (Optional Override) -->
                         <div class="agent-selector">
-                            <label class="agent-selector-label">Use AI Agent (Optional)</label>
+                            <label class="agent-selector-label">Use AI Settings (Optional)</label>
                             <div class="agent-select-wrapper">
                                 <select id="agentSelect" class="agent-select" onchange="switchAgent()">
                                     <option value="">Manual Settings</option>
@@ -2580,14 +2577,14 @@
     <div class="modal" id="agentManagerModal">
         <div class="modal-content large">
             <div class="modal-header">
-                <h2 class="modal-title">🤖 AI Agent Manager</h2>
+                <h2 class="modal-title">🤖 AI Settings Manager</h2>
                 <p style="color: var(--text-secondary); font-size: 14px;">
-                    Create and manage AI agents with custom settings and instructions
+                    Create and manage AI settings with custom configurations and optional instructions
                 </p>
             </div>
 
             <button class="btn btn-primary" style="margin-bottom: 20px;" onclick="showCreateAgentModal()">
-                + Create New Agent
+                + Create New Settings
             </button>
 
             <div id="agentsList" style="max-height: 500px; overflow-y: auto;">
@@ -2604,23 +2601,26 @@
     <div class="modal" id="createAgentModal">
         <div class="modal-content large">
             <div class="modal-header">
-                <h2 class="modal-title" id="agentModalTitle">Create AI Agent</h2>
+                <h2 class="modal-title" id="agentModalTitle">Create AI Settings</h2>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Agent Name</label>
+                <label class="form-label">Settings Name</label>
                 <input type="text" id="agentName" class="form-input" placeholder="e.g., Creative Writer, Technical Editor">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Description</label>
-                <input type="text" id="agentDescription" class="form-input" placeholder="What is this agent specialized for?">
+                <input type="text" id="agentDescription" class="form-input" placeholder="e.g., Romance scene writing, Technical documentation, etc.">
             </div>
 
             <div class="form-group">
-                <label class="form-label">System Instructions</label>
-                <textarea id="agentSystemPrompt" class="form-textarea" rows="6" 
-                          placeholder="You are a helpful AI assistant that..."></textarea>
+                <label class="form-label">System Instructions (Optional)</label>
+                <textarea id="agentSystemPrompt" class="form-textarea" rows="6"
+                          placeholder="Leave blank for general use, or add specific instructions for your use case..."></textarea>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                    System instructions are optional. Use them when you need consistent behavior across multiple uses, but leave blank if you want flexibility to change instructions for different tasks.
+                </div>
             </div>
 
             <div style="border-top: 2px solid var(--border-color); margin: 30px 0; padding-top: 30px;">
@@ -2636,7 +2636,7 @@
 
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal('createAgentModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="saveAgent()">Save Agent</button>
+                <button class="btn btn-primary" onclick="saveAgent()">Save Settings</button>
             </div>
         </div>
     </div>
@@ -2735,6 +2735,31 @@
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal('configModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="saveConfiguration()">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy Agent Modal -->
+    <div class="modal" id="copyAgentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📋 Copy AI Settings to Another Project</h2>
+            </div>
+
+            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
+                Select the project you want to copy these AI settings to:
+            </p>
+
+            <div class="form-group">
+                <label class="form-label">Target Project</label>
+                <select id="copyAgentTargetProject" class="form-select">
+                    <option value="">Select a project...</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('copyAgentModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="copyAgentToProject()">Copy Settings</button>
             </div>
         </div>
     </div>
@@ -2913,6 +2938,7 @@
         favorites: [],
         hidden: []
     },
+    materialsSortOrder: 'modified', // Default sort by last edited
     settings: {
         apiKey: '',
         model: 'anthropic/claude-3.5-sonnet',
@@ -4129,6 +4155,7 @@ function updateAgentInfo() {
                                 </div>
                             </div>
                             <div class="agent-list-actions">
+                                <button class="icon-btn" onclick="showCopyAgentModal('${agent.id}')" title="Copy to Another Project">📋</button>
                                 <button class="icon-btn" onclick="editAgent('${agent.id}')" title="Edit">✏️</button>
                                 <button class="icon-btn" onclick="deleteAgent('${agent.id}')" title="Delete">🗑️</button>
                             </div>
@@ -4140,7 +4167,7 @@ function updateAgentInfo() {
 
         function showCreateAgentModal() {
             editingAgentId = null;
-            document.getElementById('agentModalTitle').textContent = 'Create AI Agent';
+            document.getElementById('agentModalTitle').textContent = 'Create AI Settings';
             document.getElementById('agentName').value = '';
             document.getElementById('agentDescription').value = '';
             document.getElementById('agentModel').value = 'anthropic/claude-3.5-sonnet';
@@ -4159,7 +4186,7 @@ function updateAgentInfo() {
             if (!agent) return;
             
             editingAgentId = agentId;
-            document.getElementById('agentModalTitle').textContent = 'Edit AI Agent';
+            document.getElementById('agentModalTitle').textContent = 'Edit AI Settings';
             document.getElementById('agentName').value = agent.name;
             document.getElementById('agentDescription').value = agent.description || '';
             document.getElementById('agentModel').value = agent.model;
@@ -4180,7 +4207,7 @@ function showCreateAgentModal() {
     editingAgentId = null;
     tempConfigurations = [];
     
-    document.getElementById('agentModalTitle').textContent = 'Create AI Agent';
+    document.getElementById('agentModalTitle').textContent = 'Create AI Settings';
     document.getElementById('agentName').value = '';
     document.getElementById('agentDescription').value = '';
     document.getElementById('agentSystemPrompt').value = '';
@@ -4196,7 +4223,7 @@ function editAgent(agentId) {
     editingAgentId = agentId;
     tempConfigurations = JSON.parse(JSON.stringify(agent.configurations || []));
     
-    document.getElementById('agentModalTitle').textContent = 'Edit AI Agent';
+    document.getElementById('agentModalTitle').textContent = 'Edit AI Settings';
     document.getElementById('agentName').value = agent.name;
     document.getElementById('agentDescription').value = agent.description || '';
     document.getElementById('agentSystemPrompt').value = agent.systemPrompt || '';
@@ -4396,6 +4423,80 @@ function saveAgent() {
     populateAgentSelector();
     renderAgentsList();
     closeModal('createAgentModal');
+}
+
+let copyingAgentId = null;
+
+function showCopyAgentModal(agentId) {
+    copyingAgentId = agentId;
+    const agent = state.aiAgents[agentId];
+
+    if (!agent) return;
+
+    // Populate projects dropdown
+    const select = document.getElementById('copyAgentTargetProject');
+    const projects = Object.values(state.projects)
+        .filter(p => p.id !== state.currentProject?.id); // Exclude current project
+
+    if (projects.length === 0) {
+        alert('No other projects available. Create a new project first.');
+        return;
+    }
+
+    select.innerHTML = '<option value="">Select a project...</option>' +
+        projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+    document.getElementById('copyAgentModal').style.display = 'flex';
+}
+
+function copyAgentToProject() {
+    const targetProjectId = document.getElementById('copyAgentTargetProject').value;
+
+    if (!targetProjectId) {
+        alert('Please select a target project');
+        return;
+    }
+
+    const sourceAgent = state.aiAgents[copyingAgentId];
+    if (!sourceAgent) return;
+
+    // Create a copy of the agent with a new ID and project ID
+    const newId = 'agent_' + Date.now();
+    state.aiAgents[newId] = {
+        ...sourceAgent,
+        id: newId,
+        projectId: targetProjectId,
+        // Deep clone configurations array
+        configurations: JSON.parse(JSON.stringify(sourceAgent.configurations))
+    };
+
+    saveData();
+    closeModal('copyAgentModal');
+
+    const targetProject = state.projects[targetProjectId];
+    alert(`AI Settings "${sourceAgent.name}" copied to project "${targetProject.name}"`);
+}
+
+function deleteAgent(agentId) {
+    const agent = state.aiAgents[agentId];
+    if (!agent) return;
+
+    if (!confirm(`Delete AI Settings "${agent.name}"? This action cannot be undone.`)) {
+        return;
+    }
+
+    // Delete the agent
+    delete state.aiAgents[agentId];
+
+    // Clear currentAgent if it matches deleted agent
+    if (state.currentAgent === agentId) {
+        state.currentAgent = null;
+    }
+
+    // Save and refresh
+    saveData();
+    renderAgentsList();
+    populateAgentSelector();
 }
 
 function updateRangeDisplay(id) {
@@ -4848,9 +4949,30 @@ document.getElementById('sidebarProjectCategory').textContent = category?.name |
 
         function renderMaterials() {
             const container = document.getElementById('materialsList');
-            const materials = Object.values(state.materials)
-                .filter(m => m.projectId === state.currentProject.id)
-                .sort((a, b) => new Date(b.modified) - new Date(a.modified));
+
+            // Get and sort materials based on current sort order
+            let materials = Object.values(state.materials)
+                .filter(m => m.projectId === state.currentProject.id);
+
+            // Apply sorting
+            switch (state.materialsSortOrder) {
+                case 'alphabetical':
+                    materials.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'created':
+                    materials.sort((a, b) => new Date(b.created) - new Date(a.created));
+                    break;
+                case 'modified':
+                default:
+                    materials.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+                    break;
+            }
+
+            // Update the sort selector to match current state
+            const sortSelector = document.getElementById('materialsSortOrder');
+            if (sortSelector) {
+                sortSelector.value = state.materialsSortOrder;
+            }
 
             if (materials.length === 0) {
                 container.innerHTML = `
@@ -5350,26 +5472,36 @@ function updateMaterialTitle() {
                 font-size: 16px;
                 line-height: 1.8;
                 padding: 20px;
-                overflow-y: scroll;
-                min-height: 100vh;
+                overflow-y: scroll !important;
+                scrollbar-gutter: stable;
+                min-height: calc(100vh + 1px);
             }
 
-            /* Custom scrollbar styling - always visible */
+            /* Force scrollbar to always show */
             body::-webkit-scrollbar {
                 width: 12px;
+                -webkit-appearance: none;
             }
 
             body::-webkit-scrollbar-track {
                 background: #f1f1f1;
+                -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
             }
 
             body::-webkit-scrollbar-thumb {
                 background: #888;
                 border-radius: 6px;
+                -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
             }
 
             body::-webkit-scrollbar-thumb:hover {
                 background: #555;
+            }
+
+            /* Firefox scrollbar */
+            body {
+                scrollbar-width: auto;
+                scrollbar-color: #888 #f1f1f1;
             }
         `,
         setup: function(editor) {
@@ -6515,16 +6647,11 @@ function applyFont() {
         }
 
         // Toggle Materials Collapse
-        function toggleMaterialsCollapse() {
-            const content = document.getElementById('materialsCollapsibleContent');
-            const icon = document.getElementById('materialsCollapseIcon');
-            if (content.classList.contains('collapsed')) {
-                content.classList.remove('collapsed');
-                icon.textContent = '▼';
-            } else {
-                content.classList.add('collapsed');
-                icon.textContent = '▶';
-            }
+        function changeMaterialsSorting() {
+            const sortSelector = document.getElementById('materialsSortOrder');
+            state.materialsSortOrder = sortSelector.value;
+            saveData();
+            renderMaterials();
         }
 
         // Render Chats List in Compact View
